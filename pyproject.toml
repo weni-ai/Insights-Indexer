@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "insights-indexer"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+redis = "^5.0.4"
+psycopg = "^3.1.18"
+pytest = "^8.2.0"
+ipython = "^8.24.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
