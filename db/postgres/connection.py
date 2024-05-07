@@ -13,7 +13,7 @@ logging.getLogger("psycopg.pool").setLevel(logging.INFO)
 db_pool = ConnectionPool(
     minconn=1,
     maxconn=5,
-    conninfo=settings.DB_URL,
+    conninfo=settings.PG_URL,
     check=ConnectionPool.check_connection,
     open=True if settings.CONNECTION_TYPE == "pool" else False,
 )
@@ -25,7 +25,7 @@ def get_connection():
         with db_pool.connection(row_factory=dict_row) as conn:
             yield conn
     else:
-        with connect(settings.DB_URL, row_factory=dict_row) as conn:
+        with connect(settings.PG_URL, row_factory=dict_row) as conn:
             yield conn
 
 
