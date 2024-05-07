@@ -2,7 +2,7 @@ import logging
 import settings
 from psycopg import connect
 
-from psycopg_pool import ConnectionPool
+from psycopg_pool import ConnectionPool, NullConnectionPool
 from psycopg.rows import dict_row
 from contextlib import contextmanager
 
@@ -10,12 +10,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 logging.getLogger("psycopg.pool").setLevel(logging.INFO)
 
-db_pool = ConnectionPool(
-    minconn=1,
-    maxconn=5,
+db_pool = NullConnectionPool(
+    max_size=5,
     conninfo=settings.PG_URL,
     check=ConnectionPool.check_connection,
-    open=True if settings.CONNECTION_TYPE == "pool" else False,
 )
 
 
