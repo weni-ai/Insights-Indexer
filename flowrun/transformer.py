@@ -16,6 +16,7 @@ def flowrun_sql_to_elasticsearch_transformer(
         results: str(json)
         delete_reason: str(1)
         exit_type: str(1)
+        contact_uuid: str
         contact_name: str
         contact_urn: str
         flow_uuid: str
@@ -31,6 +32,7 @@ def flowrun_sql_to_elasticsearch_transformer(
         responded: bool
         delete_reason: str(1)
         exit_type: str(1)
+        contact_uuid: str
         contact_name: str
         contact_urn: str
         flow_uuid: str
@@ -49,7 +51,7 @@ def flowrun_sql_to_elasticsearch_transformer(
     }
     """
     es_flow_run = {**pg_flow_run, "results": {}}
-    results = json.loads(pg_flow_run)
+    results = json.loads(pg_flow_run.get("results", {}))
     result = es_flow_run.get("results", {})
 
     for k, v in results.items():
