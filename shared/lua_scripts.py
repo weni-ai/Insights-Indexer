@@ -2,7 +2,7 @@ pop_item_from_list_then_add_to_sorted_set_with_timestamp = """
 local list_name = KEYS[1]
 local sorted_set_name = KEYS[2]
 
-local item = redis.call('RPOP', list_name)
+local item = redis.call('LPOP', list_name)
 if item then
     redis.call('ZADD', sorted_set_name, ARGV[1], item)
 end
