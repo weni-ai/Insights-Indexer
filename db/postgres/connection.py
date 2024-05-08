@@ -10,11 +10,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 logging.getLogger("psycopg.pool").setLevel(logging.INFO)
 
-PG_URL = settings.PG_URL
-
 db_pool = NullConnectionPool(
     max_size=5,
-    conninfo=PG_URL,
+    conninfo=settings.PG_URL,
     check=ConnectionPool.check_connection,
 )
 
@@ -25,7 +23,7 @@ def get_connection():
         with db_pool.connection() as conn:
             yield conn
     else:
-        with connect(PG_URL) as conn:
+        with connect(settings.PG_URL) as conn:
             yield conn
 
 
