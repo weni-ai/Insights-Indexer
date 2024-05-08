@@ -19,7 +19,9 @@ ARG RUNTIME_DEPS="\
     curl \
     gosu \
     gettext \
-    postgresql-client"
+    postgresql-client \
+    ffmpeg \
+    libmagic1"
 
 FROM python:${PYTHON_VERSION}-slim as base
 
@@ -31,8 +33,8 @@ ARG APP_VERSION="0.1"
 ENV APP_VERSION=${APP_VERSION} \
     RUNTIME_DEPS=${RUNTIME_DEPS} \
     BUILD_DEPS=${BUILD_DEPS} \
-    APPLICATION_NAME="Insights" \
-    PROJECT_PATH=/insights \
+    APPLICATION_NAME="insights-indexer" \
+    PROJECT_PATH=/insights-indexer \
     PROJECT_USER=app_user \
     PROJECT_GROUP=app_group \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -63,9 +65,9 @@ ARG POETRY_VERSION
 
 COPY pyproject.toml poetry.lock ./
 
-RUN --mount=type=cache,mode=0755,target=/pip_cache,id=pip pip install --cache-dir /pip_cache -U poetry=="${POETRY_VERSION}" \
+RUN --mount=type=cache,mode=0755,target=/pip_cache,id=pip pip install -U poetry=="${POETRY_VERSION}" \
     && poetry cache clear -n --all pypi \
-    && poetry export --without-hashes --output requirements.txtq
+    && poetry export --without-hashes --output requirements.txt
 
 FROM base as build
 
@@ -98,6 +100,8 @@ COPY --from=build /install /usr/local
 COPY --chown=${PROJECT_USER}:${PROJECT_GROUP} . ${PROJECT_PATH}
 
 USER "${PROJECT_USER}:${PROJECT_GROUP}"
+
+EXPOSE 8000
 
 ENTRYPOINT ["bash", "docker-entrypoint.sh"]
 CMD ["start"]
