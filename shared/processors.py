@@ -11,9 +11,12 @@ class ObjectETLProcessor:
 
     def execute(self, object_identifier: str):
         # validate is already create in the To Storage
-        to_obj = self.storage_to.get_by_pk(object_identifier)
-        if to_obj is not None:
-            return True
+        try:
+            to_obj = self.storage_to.get_by_pk(object_identifier)
+            if to_obj is not None:
+                return True
+        except AttributeError as err:
+            print("[-] Elasticsearch Get error: ", type(err), err)
 
         # [E]xtract the obj instance from the From Storage
         from_obj = self.storage_from.get_by_pk(object_identifier)
