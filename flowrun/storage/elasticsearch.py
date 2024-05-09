@@ -19,7 +19,5 @@ class FlowRunElasticSearch(GenericStorage):
         return es_flow_run  # FlowRunElasticSearchDTO.from_dict(es_flow_run)
 
     def insert(self, new_obj: dict) -> bool:
-        es_flow_run = get_connection().index(
-            index=self._index_name, body=new_obj.to_dict()
-        )
+        es_flow_run = get_connection().index(index=self._index_name, body=new_obj)
         return es_flow_run.get("ok")
