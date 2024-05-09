@@ -15,6 +15,7 @@ class FlowRunElasticSearch(GenericStorage):
             ]
         except (AttributeError, TypeError) as err:
             print("[-] Elasticsearch Get error: ", type(err), err)
+            return None
         return es_flow_run  # FlowRunElasticSearchDTO.from_dict(es_flow_run)
 
     def insert(self, new_obj: dict) -> bool:
