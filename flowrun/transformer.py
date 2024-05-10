@@ -38,27 +38,41 @@ def flowrun_sql_to_elasticsearch_transformer(
         flow_uuid: str
         flow_name: str
         project_uuid: uuid
-        results: str(json) -> {
-            x.value: str|int
-            x.category: str
-            y.value: str|int
-            y.category: str
-            z.value: str|int
-            z.category: str
-            (...)
-        }
-
+        results: list(dict) ->
+        [
+            {
+                name: str
+                value: str
+                value_number: float
+                category: str
+            },
+            {
+                name: str
+                value: str
+                value_number: float
+                category: str
+            },
+            {...}
+        ]
     }
     """
     es_flow_run = {**pg_flow_run, "results": {}}
     results = json.loads(pg_flow_run.get("results", {}))
-    result = es_flow_run.get("results", {})
+    new_results = []
 
     for k, v in results.items():
+        new_obj = {}
+        new_obj["name"] = k
+        new_obj["category"] = v.get("category")
+
         value = v.get("value")
-        result[f"{k}.value"] = int(value) if value.isdigit() else value
-        result[f"{k}.category"] = v.get("category")
-    es_flow_run["results"] = result
+        new_obj["value"] = value
+
+        if value.isdigit():
+            new_obj["value_number"] = float(value)
+
+        new_results.append(new_obj)
+    es_flow_run["values"] = new_results
     return es_flow_run
 
 
