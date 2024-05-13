@@ -10,14 +10,15 @@ class FlowRunElasticSearch(GenericStorage):
 
     def get_by_pk(self, identifier: str) -> FlowRunElasticSearchDTO:
         try:
-            es_flow_run = get_connection().get(index=self._index_name, uuid=identifier)[
-                "_source"
-            ]
-        except (AttributeError, TypeError) as err:
+            es_flow_run = get_connection().search(
+                index=self._index_name,
+                body={"size": 1, "query": {"terms": {"uuid": identifier}}},
+            )["hits"]["hits"][0]["_source"]
+        except (AttributeError, TypeError, IndexError) as err:
             print("[-] Elasticsearch Get error: ", type(err), err)
             return None
         return es_flow_run  # FlowRunElasticSearchDTO.from_dict(es_flow_run)
 
     def insert(self, new_obj: dict) -> bool:
         es_flow_run = get_connection().index(index=self._index_name, body=new_obj)
-        return es_flow_run.get("ok")
+        return es_flow_run["result"] == "created"

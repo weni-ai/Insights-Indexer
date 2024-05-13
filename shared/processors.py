@@ -16,14 +16,16 @@ class ObjectETLProcessor:
             return True
 
         # [E]xtract the obj instance from the From Storage
-        from_obj = self.storage_from.get_by_pk(object_identifier)
-        if from_obj is None:
-            return False
+        from_obj: dict = self.storage_from.get_by_pk(object_identifier)
+        if (
+            from_obj is None
+        ):  # if the object with the indetifier does not exist, do nothing with it
+            return True
 
         # [T]ransform the object to be saved in the new storage
-        transformed_obj = self.object_transformer(from_obj)
+        transformed_obj: dict = self.object_transformer(from_obj)
 
         # [L]oad the treated object into the new storage
-        new_obj = self.storage_to.insert(transformed_obj)
+        is_inserted: bool = self.storage_to.insert(transformed_obj)
 
-        return bool(new_obj)  # if None will return False else True
+        return is_inserted
