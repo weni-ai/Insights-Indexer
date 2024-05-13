@@ -1,6 +1,8 @@
 import redis
 import settings
 import time
+import threading
+
 from datetime import datetime, timedelta
 
 from shared.processors import ObjectETLProcessor
@@ -61,7 +63,7 @@ class RedisListAndXSetReliableQueue:
         )
         if run_id is None:
             return
-        processor_status = FlowRunPGtoES.execute(run_id)
+        processor_status = self.data_processor.execute(run_id)
         if processor_status:
             self.conn.zrem(self.process_list, run_id)
 
@@ -70,9 +72,11 @@ class RedisListAndXSetReliableQueue:
         self._handle_proc_queue()
 
 
-if __name__ == "__main__":
+def start():
     rqc = RedisListAndXSetReliableQueue(
-        wait_list="flowruns:wait", process_list="flowruns:proc", max_time=900
+        wait_list=settings.FLOWRUN_WAIT_LIST,
+        process_list=settings.FLOWRUN_PROC_LIST,
+        max_time=900,
     )
 
     while True:
@@ -91,3 +95,13 @@ if __name__ == "__main__":
         except Exception as error:
             print("[-] error on handling events:", type(error), error)
             time.sleep(settings.REDIS_WAIT_TIME_RETRY)
+
+
+if __name__ == "__main__":
+    for i in range(0, settings.CONSUMER_THREADS):
+        thread = threading.Thread(target=start, name=f"indexer-consumer-t{i}")
+        thread.start()
+        print(f"[+] Started indexer consumer thread {i}")
+
+    while True:
+        time.sleep(settings.CONSUMER_MAIN_DELAY)
