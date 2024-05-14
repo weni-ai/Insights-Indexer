@@ -8,11 +8,11 @@ from shared.queue_handlers import RedisListAndXSetReliableQueue
 
 if settings.BLOCK_WAIT_HANDLER is True:
     from shared.queue_handlers import (
-        get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script as wait_queue_handler,
+        block_get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script as wait_queue_handler,
     )
 else:
     from shared.queue_handlers import (
-        block_get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script as wait_queue_handler,
+        get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script as wait_queue_handler,
     )
 
 
@@ -57,10 +57,13 @@ def start():
 
 
 if __name__ == "__main__":
-    for i in range(0, settings.CONSUMER_THREADS):
-        thread = threading.Thread(target=start, name=f"indexer-consumer-t{i}")
-        thread.start()
-        print(f"[+] Started indexer consumer thread {i}")
-
-    while True:
-        time.sleep(settings.CONSUMER_MAIN_DELAY)
+    if settings.USE_THREADS:
+        for i in range(0, settings.CONSUMER_THREADS):
+            thread = threading.Thread(target=start, name=f"indexer-consumer-t{i}")
+            thread.start()
+            print(f"[+] Started indexer consumer thread {i}")
+        while True:
+            time.sleep(settings.CONSUMER_MAIN_DELAY)
+    else:
+        start()
+        print("[+] Service running")
