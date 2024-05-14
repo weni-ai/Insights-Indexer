@@ -49,6 +49,8 @@ def block_get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script(
 ):
     """This might not be reliable, if some error occurs after blpop and before eval, the task will lost"""
     obj_id = conn.blpop(list_from, timeout=settings.REDIS_BLPOP_TIMEOUT)
+    if obj_id is None:
+        return
     conn.eval(
         add_item_to_sorted_set_with_timestamp, 1, xset_to, int(time.time()), obj_id
     )
