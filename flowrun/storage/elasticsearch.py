@@ -12,7 +12,7 @@ class FlowRunElasticSearch(GenericStorage):
         try:
             es_flow_run = get_connection().search(
                 index=self._index_name,
-                body={"size": 1, "query": {"terms": {"uuid": identifier}}},
+                body={"size": 1, "query": {"term": {"uuid": identifier}}},
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
             print("[-] Elasticsearch Get error: ", type(err), err)
