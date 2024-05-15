@@ -56,7 +56,7 @@ def block_get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script(
     conn.eval(
         add_item_to_sorted_set_with_timestamp, 1, xset_to, int(time.time()), obj_id[1]
     )
-    return obj_id
+    return obj_id[1]
 
 
 class RedisListAndXSetReliableQueue(RedisQueueHandlerBase):
