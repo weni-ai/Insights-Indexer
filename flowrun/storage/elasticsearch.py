@@ -15,7 +15,7 @@ class FlowRunElasticSearch(GenericStorage):
                 body={"size": 1, "query": {"term": {"uuid": identifier}}},
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
-            print("[-] Elasticsearch Get error: ", type(err), err)
+            print("[-] <Warning> Elasticsearch Get error: ", type(err), err)
             return None
         return es_flow_run  # FlowRunElasticSearchDTO.from_dict(es_flow_run)
 
