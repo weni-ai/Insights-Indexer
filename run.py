@@ -63,7 +63,7 @@ if __name__ == "__main__":
             thread.start()
             print(f"\n[+] Started indexer consumer thread {i}")
         while True:
-            time.sleep(settings.CONSUMER_MAIN_DELAY)
+            time.sleep(int(settings.CONSUMER_MAIN_DELAY))
     else:
         start()
         print("\n[+] Service running on single thread mode")
