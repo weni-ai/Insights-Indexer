@@ -13,9 +13,7 @@ return item
 add_item_to_sorted_set_with_timestamp = """
 local sorted_set_name = KEYS[1]
 
-if item then
-    redis.call('ZADD', sorted_set_name, ARGV[1], ARGV[2])
-end
+redis.call('ZADD', sorted_set_name, ARGV[1], ARGV[2])
 
 return item
 """
