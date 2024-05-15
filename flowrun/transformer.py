@@ -38,7 +38,7 @@ def flowrun_sql_to_elasticsearch_transformer(
         flow_uuid: str
         flow_name: str
         project_uuid: uuid
-        results: list(dict) ->
+        values: list(dict) ->
         [
             {
                 name: str
@@ -56,7 +56,7 @@ def flowrun_sql_to_elasticsearch_transformer(
         ]
     }
     """
-    es_flow_run = {**pg_flow_run, "results": {}}
+    es_flow_run = {**pg_flow_run}
     results = json.loads(pg_flow_run.get("results", {}))
     new_results = []
 
@@ -72,6 +72,7 @@ def flowrun_sql_to_elasticsearch_transformer(
             new_obj["value_number"] = float(value)
 
         new_results.append(new_obj)
+    es_flow_run.pop("results", None)
     es_flow_run["values"] = new_results
     return es_flow_run
 

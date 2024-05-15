@@ -48,11 +48,13 @@ def block_get_id_from_list_and_move_to_xset_and_add_timestamp_with_lua_script(
     conn: redis.client.Redis, list_from: str, xset_to: str
 ):
     """This might not be reliable, if some error occurs after blpop and before eval, the task will lost"""
-    obj_id = conn.blpop(list_from, timeout=settings.REDIS_BLPOP_TIMEOUT)
-    if obj_id is None:
+    obj_id = conn.blpop(
+        list_from, timeout=settings.REDIS_BLPOP_TIMEOUT
+    )  # blpop returns a set (key_name, value)
+    if obj_id is None or obj_id == ():
         return
     conn.eval(
-        add_item_to_sorted_set_with_timestamp, 1, xset_to, int(time.time()), obj_id
+        add_item_to_sorted_set_with_timestamp, 1, xset_to, int(time.time()), obj_id[1]
     )
     return obj_id
 
