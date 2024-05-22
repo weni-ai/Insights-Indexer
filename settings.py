@@ -10,6 +10,7 @@ CONNECTION_TYPE = os.environ.get("CONNECTION_TYPE", "pool")
 REDIS_WAIT_TIME_RETRY = os.environ.get("REDIS_WAIT_TIME_RETRY", 10)
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
+PROCESS_TYPE = os.environ.get("PROCESS_TYPE", "BULK")
 USE_THREADS = os.environ.get("USE_THREADS", True)
 CONSUMER_THREADS = os.environ.get("CONSUMER_THREADS", 3)
 CONSUMER_MAIN_DELAY = os.environ.get("CONSUMER_MAIN_DELAY", 1000)

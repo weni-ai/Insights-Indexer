@@ -20,7 +20,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
             ).fetchone()
             return flowrun_query
 
-    def list_by_modified_on(
+    def list_by_timestamp(
         self, modified_on: str, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
         with get_cursor() as cur:
