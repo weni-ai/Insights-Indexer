@@ -27,7 +27,7 @@ class FlowRunElasticSearch(GenericStorage):
                 index=self._index_name,
                 body={
                     "size": 1,
-                    "sort": {"modified_on": "desc"},
+                    "sort": {settings.FLOW_LAST_INDEXED_FIELD: "desc"},
                     "query": {"match_all": {}},
                 },
             )["hits"]["hits"][0]["_source"]
@@ -37,7 +37,9 @@ class FlowRunElasticSearch(GenericStorage):
         return es_flow_run
 
     def get_last_indexed_timestamp(self):
-        return self.get_last_indexed().get("modified_on", datetime.now(timezone.utc))
+        return self.get_last_indexed().get(
+            settings.FLOW_LAST_INDEXED_FIELD, datetime.now(timezone.utc)
+        )
 
     def insert(self, new_obj: dict) -> bool:
         es_flow_run = get_connection().index(index=self._index_name, body=new_obj)
@@ -45,5 +47,7 @@ class FlowRunElasticSearch(GenericStorage):
 
     def bulk_insert(self, batch) -> bool:
         run_batch = get_connection().bulk(index=self._index_name, body=batch)
-        print(f"took {run_batch.get('took', 'err')}s to index {len(batch)} documents")
+        print(
+            f"took {run_batch.get('took', 'err')}ms to index {len(run_batch.get('items', batch))} documents"
+        )
         return run_batch.get("errors", True)
