@@ -52,7 +52,7 @@ class BulkObjectETLProcessor:
         for obj in from_obj_list:
             # [T]ransform the object to be saved in the new storage
             transformed_obj: dict = self.object_transformer(obj)
-            transformed_objects.append(transformed_obj)
+            transformed_objects += transformed_obj
 
         # [L]oad the treated object list into the new storage
         is_inserted: bool = self.storage_to.bulk_insert(transformed_objects)

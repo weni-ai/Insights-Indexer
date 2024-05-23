@@ -11,6 +11,7 @@ def flowrun_sql_to_elasticsearch_transformer(
         uuid: uuid
         status: str(1)
         created_on: timestamp
+        modified_on: timestamp
         exited_on: timestamp
         responded: bool
         results: str(json)
@@ -77,7 +78,9 @@ def flowrun_sql_to_elasticsearch_transformer(
     return es_flow_run
 
 
-def bulk_flowrun_sql_to_elasticsearch_transformer(pg_flow_run: list[dict]):
+def bulk_flowrun_sql_to_elasticsearch_transformer(
+    pg_flow_run: list[dict],
+) -> list[dict]:
     obj = flowrun_sql_to_elasticsearch_transformer(pg_flow_run)
     _id = obj.pop("id")
     return [{"index": {"_id": _id}}, obj]

@@ -54,7 +54,7 @@ def single_process():
         except ConnectionRefusedError as error:  # treat redis errors aswell
             print(f"\n[-] Connection error: {error}")
             print("\n[+] Reconnecting in 5 seconds...")
-            time.sleep(int(settings.REDIS_WAIT_TIME_RETRY))
+            time.sleep(settings.REDIS_WAIT_TIME_RETRY)
 
         except KeyboardInterrupt:
             print("\n[-] Connection closed: Keyboard Interrupt")
@@ -62,7 +62,7 @@ def single_process():
 
         except Exception as error:
             print("\n[-] error on handling events:", type(error), error)
-            time.sleep(int(settings.REDIS_WAIT_TIME_RETRY))
+            time.sleep(settings.REDIS_WAIT_TIME_RETRY)
 
 
 def bulk_process():
@@ -72,7 +72,7 @@ def bulk_process():
         except ConnectionRefusedError as error:
             print(f"\n[-] Connection error: {error}")
             print("\n[+] Reconnecting in 10 seconds...")
-            time.sleep(int(settings.REDIS_WAIT_TIME_RETRY))
+            time.sleep(settings.REDIS_WAIT_TIME_RETRY)
 
         except KeyboardInterrupt:
             print("\n[-] Connection closed: Keyboard Interrupt")
@@ -80,7 +80,7 @@ def bulk_process():
 
         except Exception as error:
             print("\n[-] error on handling events:", type(error), error)
-            time.sleep(int(settings.REDIS_WAIT_TIME_RETRY))
+            time.sleep(settings.REDIS_WAIT_TIME_RETRY)
 
 
 def start():
@@ -89,12 +89,12 @@ def start():
         print("\n[+] Service running on bulk process single thread mode")
     else:
         if settings.USE_THREADS:
-            for i in range(0, int(settings.CONSUMER_THREADS)):
+            for i in range(0, settings.CONSUMER_THREADS):
                 thread = threading.Thread(target=start, name=f"indexer-consumer-t{i}")
                 thread.start()
                 print(f"\n[+] Started indexer consumer thread {i}")
             while True:
-                time.sleep(int(settings.CONSUMER_MAIN_DELAY))
+                time.sleep(settings.CONSUMER_MAIN_DELAY)
         else:
             start()
             print("\n[+] Service running on single thread mode")

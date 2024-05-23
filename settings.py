@@ -6,9 +6,9 @@ FLOWRUN_USE_ORG = bool(int(os.environ.get("FLOWRUN_USE_ORG", "1")))
 
 ES_URL = os.environ.get("ES_URL", "")
 ES_FLOWRUN_INDEX_NAME = os.environ.get("ES_FLOWRUN_INDEX_NAME", "flowruns")
-FLOW_RUN_BATCH_LIMIT = os.environ.get("FLOW_RUN_BATCH_LIMIT", 100)
+FLOW_RUN_BATCH_LIMIT = int(os.environ.get("FLOW_RUN_BATCH_LIMIT", 100))
 CONNECTION_TYPE = os.environ.get("CONNECTION_TYPE", "pool")
-REDIS_WAIT_TIME_RETRY = os.environ.get("REDIS_WAIT_TIME_RETRY", 10)
+REDIS_WAIT_TIME_RETRY = int(os.environ.get("REDIS_WAIT_TIME_RETRY", 10))
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
 PROCESS_TYPE = os.environ.get("PROCESS_TYPE", "BULK")
