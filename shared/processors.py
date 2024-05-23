@@ -44,14 +44,14 @@ class BulkObjectETLProcessor:
         last_indexed_at = self.storage_to.get_last_indexed_timestamp()
 
         # [E]xtract the obj list from the From Storage, filtered by the last saved on the storage_to
-        from_obj_list: dict = self.storage_from.list_by_timestamp(last_indexed_at)
+        from_obj_list = self.storage_from.list_by_timestamp(last_indexed_at)
         if len(from_obj_list) == 0:  # if there's no objesct on the list
             return True
 
         transformed_objects = []
         for obj in from_obj_list:
             # [T]ransform the object to be saved in the new storage
-            transformed_obj: dict = self.object_transformer(obj)
+            transformed_obj = self.object_transformer(obj)
             transformed_objects += transformed_obj
 
         # [L]oad the treated object list into the new storage
