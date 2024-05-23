@@ -68,10 +68,10 @@ def single_process():
 def bulk_process():
     while True:
         try:
-            BulkFlowRunPGtoES().execute()
+            BulkFlowRunPGtoES.execute()
         except ConnectionRefusedError as error:
             print(f"\n[-] Connection error: {error}")
-            print("\n[+] Reconnecting in 5 seconds...")
+            print("\n[+] Reconnecting in 10 seconds...")
             time.sleep(int(settings.REDIS_WAIT_TIME_RETRY))
 
         except KeyboardInterrupt:
