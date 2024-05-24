@@ -17,7 +17,7 @@ else:
 
 
 from flowrun.storage.elasticsearch import FlowRunElasticSearch
-from flowrun.storage.postgresql import FlowRunPostgreSQL
+from flowrun.storage.postgresql import FlowRunPostgreSQL, OrgPostgreSQL
 from flowrun.transformer import (
     bulk_flowrun_sql_to_elasticsearch_transformer,
     flowrun_sql_to_elasticsearch_transformer,
@@ -27,14 +27,15 @@ from db.redis.connection import get_connection as get_redis_connection
 
 FlowRunPGtoES = ObjectETLProcessor(
     object_transformer=flowrun_sql_to_elasticsearch_transformer,
-    storage_from=FlowRunPostgreSQL(),
     storage_to=FlowRunElasticSearch(),
+    storage_from=FlowRunPostgreSQL(),
 )
 
 BulkFlowRunPGtoES = BulkObjectETLProcessor(
     object_transformer=bulk_flowrun_sql_to_elasticsearch_transformer,
-    storage_from=FlowRunPostgreSQL(),
     storage_to=FlowRunElasticSearch(),
+    storage_from=FlowRunPostgreSQL(),
+    storage_org=OrgPostgreSQL(),
 )
 
 

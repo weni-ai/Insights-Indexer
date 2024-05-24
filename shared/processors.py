@@ -36,12 +36,16 @@ class ObjectETLProcessor:
 
 class BulkObjectETLProcessor:
     def __init__(
-        self, object_transformer: Callable, storage_from: object, storage_to: object
+        self,
+        object_transformer: Callable,
+        storage_from: object,
+        storage_to: object,
+        storage_org: object,
     ) -> None:
         self.object_transformer = object_transformer
         self.storage_from = storage_from
         self.storage_to = storage_to
-        self.storage_org
+        self.storage_org = storage_org
 
     def execute(self):
         orgs = self.storage_org.list_active()
