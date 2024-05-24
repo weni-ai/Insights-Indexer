@@ -33,7 +33,7 @@ class FlowRunElasticSearch(GenericStorage):
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
             print("[-] <Warning> Elasticsearch Get error: ", type(err), err)
-            return None
+            return {}
         return es_flow_run
 
     def get_last_indexed_timestamp(self, org):
