@@ -1,4 +1,7 @@
+import settings
+
 from typing import Callable
+from datetime import datetime, timedelta
 
 
 class ObjectETLProcessor:
@@ -38,23 +41,34 @@ class BulkObjectETLProcessor:
         self.object_transformer = object_transformer
         self.storage_from = storage_from
         self.storage_to = storage_to
+        self.storage_org
 
     def execute(self):
-        # Get last indexed document on the storage_to
-        last_indexed_at = self.storage_to.get_last_indexed_timestamp()
+        orgs = self.storage_org.list_active()
+        for org in orgs:
+            org_id = org.get("id")
+            # Get last indexed document on the storage_to
+            last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)
 
-        # [E]xtract the obj list from the From Storage, filtered by the last saved on the storage_to
-        from_obj_list = self.storage_from.list_by_timestamp(last_indexed_at)
-        if len(from_obj_list) == 0:  # if there's no objesct on the list
-            return True
+            # [E]xtract the obj list from the From Storage, filtered by the last saved on the storage_to
+            from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                modified_on=last_indexed_at, org_id=org_id
+            )
+            if len(from_obj_list) == 0:  # if there's no objesct on the list
+                return True
 
-        transformed_objects = []
-        for obj in from_obj_list:
-            # [T]ransform the object to be saved in the new storage
-            transformed_obj = self.object_transformer(obj)
-            transformed_objects += transformed_obj
+            transformed_objects = []
+            start = datetime.now()
+            for obj in from_obj_list:
+                # [T]ransform the object to be saved in the new storage
+                transformed_obj = self.object_transformer(obj)
+                transformed_objects += transformed_obj
+                if start < datetime.now() - timedelta(
+                    minutes=settings.BATCH_PROCESSING_TIME_LIMIT
+                ):  # no single org should take more than X time
+                    break
 
-        # [L]oad the treated object list into the new storage
-        is_inserted: bool = self.storage_to.bulk_insert(transformed_objects)
+            # [L]oad the treated object list into the new storage
+            is_inserted: bool = self.storage_to.bulk_insert(transformed_objects)
 
         return is_inserted
