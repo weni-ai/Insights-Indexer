@@ -28,7 +28,7 @@ class FlowRunElasticSearch(GenericStorage):
                 body={
                     "size": 1,
                     "sort": {settings.FLOW_LAST_INDEXED_FIELD: "desc"},
-                    "query": {"match": {"org_id": org}},
+                    "query": {"term": {"org_id": org}},
                 },
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:

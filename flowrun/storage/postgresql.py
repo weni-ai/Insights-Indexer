@@ -31,9 +31,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
             return flowrun_query
 
 
-get_active_orgs = (
-    "SELECT id, name, created_on FROM orgs_org WHERE is_active = TRUE order by id;"
-)
+get_active_orgs = "SELECT id FROM orgs_org WHERE is_active = TRUE order by id;"
 
 
 class OrgPostgreSQL(BaseRetrieveStorage):

@@ -51,6 +51,7 @@ class BulkObjectETLProcessor:
         orgs = self.storage_org.list_active()
         for org in orgs:
             org_id = org.get("id")
+            print(f"org {org_id} \n")
             # Get last indexed document on the storage_to
             last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)
 

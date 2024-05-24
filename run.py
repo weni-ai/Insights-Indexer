@@ -73,7 +73,6 @@ def bulk_process():
         except ConnectionRefusedError as error:
             print(f"\n[-] Connection error: {error}")
             print("\n[+] Reconnecting in 10 seconds...")
-            time.sleep(settings.REDIS_WAIT_TIME_RETRY)
 
         except KeyboardInterrupt:
             print("\n[-] Connection closed: Keyboard Interrupt")
@@ -81,7 +80,8 @@ def bulk_process():
 
         except Exception as error:
             print("\n[-] error on handling events:", type(error), error)
-            time.sleep(settings.REDIS_WAIT_TIME_RETRY)
+
+        time.sleep(settings.REDIS_WAIT_TIME_RETRY)
 
 
 def start():
