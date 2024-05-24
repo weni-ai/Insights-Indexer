@@ -60,7 +60,7 @@ class BulkObjectETLProcessor:
                 modified_on=last_indexed_at, org_id=org_id
             )
             if len(from_obj_list) == 0:  # if there's no objesct on the list
-                return True
+                continue
 
             transformed_objects = []
             start = datetime.now()
