@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone, timedelta
 
 import settings
@@ -16,7 +17,7 @@ class FlowRunElasticSearch(GenericStorage):
                 body={"size": 1, "query": {"term": {"uuid": identifier}}},
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
-            print("[-] <Warning> Elasticsearch Get error: ", type(err), err)
+            logging.warning("Elasticsearch Get error: ", type(err), err)
             return None
         return es_flow_run
 
@@ -31,7 +32,7 @@ class FlowRunElasticSearch(GenericStorage):
                 },
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
-            print("[-] <Warning> Elasticsearch Get error: ", type(err), err)
+            logging.warning("While listing flowruns: ", type(err), err)
             return {}
         return es_flow_run
 
@@ -47,7 +48,7 @@ class FlowRunElasticSearch(GenericStorage):
 
     def bulk_insert(self, batch) -> bool:
         run_batch = get_connection().bulk(index=self._index_name, body=batch)
-        print(
+        logging.info(
             f"took {run_batch.get('took', 'err')}ms to index {len(run_batch.get('items', batch))} documents"
         )
         return run_batch.get("errors", True)

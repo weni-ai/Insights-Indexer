@@ -1,6 +1,7 @@
-import settings
+import logging
 import time
 
+import settings
 
 from shared.processors import BulkObjectETLProcessor
 
@@ -10,6 +11,9 @@ from flowrun.transformer import (
     bulk_flowrun_sql_to_elasticsearch_transformer,
 )
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 BulkFlowRunPGtoES = BulkObjectETLProcessor(
     object_transformer=bulk_flowrun_sql_to_elasticsearch_transformer,
@@ -24,23 +28,27 @@ def bulk_process():
         try:
             BulkFlowRunPGtoES.execute()
         except ConnectionRefusedError as error:
-            print(f"\n[-] Connection error: {error}")
-            print("\n[+] Reconnecting in 10 seconds...")
+            logging.info(f"[-] Connection error: {error}")
+            logging.info("[+] Reconnecting in 10 seconds...")
             time.sleep(settings.WAIT_TIME_RETRY)
             continue
 
         except KeyboardInterrupt:
-            print("\n[-] Connection closed: Keyboard Interrupt")
+            logging.info("[-] Connection closed: Keyboard Interrupt")
             break
 
         except Exception as error:
-            print("\n[-] error on handling events:", type(error), error)
+            logging.info("[-] error on handling events:", type(error), error)
             time.sleep(settings.WAIT_TIME_RETRY)
             continue
 
         time.sleep(settings.CONSUMER_MAIN_DELAY)
 
 
-if __name__ == "__main__":
+def main():
+    logging.info("Service running on bulk process single thread mode")
     bulk_process()
-    print("\n[+] Service running on bulk process single thread mode")
+
+
+if __name__ == "__main__":
+    main()
