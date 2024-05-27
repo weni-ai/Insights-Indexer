@@ -40,7 +40,7 @@ def bulk_process():
             break
 
         except Exception as error:
-            logging.info("[-] error on handling events:", type(error), error)
+            logging.info(f"[-] error on handling events: {type(error)}, {error}")
             time.sleep(settings.WAIT_TIME_RETRY)
             continue
 

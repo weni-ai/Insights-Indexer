@@ -17,7 +17,7 @@ class FlowRunElasticSearch(GenericStorage):
                 body={"size": 1, "query": {"term": {"uuid": identifier}}},
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
-            logging.warning("Elasticsearch Get error: ", type(err), err)
+            logging.warning(f"Elasticsearch Get error: {type(err)} {err}")
             return None
         return es_flow_run
 
@@ -32,7 +32,7 @@ class FlowRunElasticSearch(GenericStorage):
                 },
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
-            logging.warning("While listing flowruns: ", type(err), err)
+            logging.warning(f"While listing flowruns: {type(err)} {err}")
             return {}
         return es_flow_run
 
