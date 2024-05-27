@@ -1,3 +1,4 @@
+import time
 import settings
 
 from typing import Callable
@@ -30,6 +31,7 @@ class BulkObjectETLProcessor:
                 modified_on=last_indexed_at, org_id=org_id
             )
             if len(from_obj_list) == 0:  # if there's no objects on the list
+                time.sleep(settings.EMPTY_ORG_SLEEP)
                 continue
 
             transformed_objects = []
@@ -46,5 +48,6 @@ class BulkObjectETLProcessor:
 
             # [L]oad the treated object list into the new storage
             is_inserted: bool = self.storage_to.bulk_insert(transformed_objects)
+            time.sleep(settings.EMPTY_ORG_SLEEP)
 
         return is_inserted

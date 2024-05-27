@@ -1,3 +1,5 @@
+import sentry_sdk
+
 import logging
 import time
 
@@ -46,6 +48,12 @@ def bulk_process():
 
 
 def main():
+    if settings.USE_SENTRY:
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            enable_tracing=True,
+        )
+
     logging.info("Service running on bulk process single thread mode")
     bulk_process()
 
