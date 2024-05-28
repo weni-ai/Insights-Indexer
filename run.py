@@ -5,6 +5,7 @@ import time
 
 import settings
 
+# from db.redis.connection import get_connection as get_redis_connection
 from shared.processors import BulkObjectETLProcessor
 
 from flowrun.storage.elasticsearch import FlowRunElasticSearch
@@ -53,7 +54,9 @@ def main():
             dsn=settings.SENTRY_DSN,
             enable_tracing=True,
         )
-
+    # redis = get_redis_connection()
+    # batch_position = redis.get(settings.REDIS_BATCH_POSITION)
+    # if batch_position
     logging.info("Service running on bulk process single thread mode")
     bulk_process()
 

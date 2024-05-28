@@ -31,18 +31,19 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
             return flowrun_query
 
 
-get_active_orgs = "SELECT id FROM orgs_org WHERE is_active = TRUE"
+get_active_orgs = "SELECT id FROM orgs_org WHERE is_active = TRUE "
 org_query_attrs = []
-if settings.IS_LAST_ORG_BATCH:
-    get_active_orgs += "AND id > (%s)"
-    org_query_attrs = [
-        settings.ORG_RANGE_FROM,
-    ]
-else:
-    get_active_orgs += "AND id BETWEEN (%s) AND (%s)"
-    org_query_attrs = [settings.ORG_RANGE_FROM, settings.ORG_RANGE_TO]
 
-get_active_orgs += "order by id;"
+if settings.ALLOWED_ORGS:
+    get_active_orgs += "AND proj_uuid IN %s "
+    org_query_attrs.append(settings.ALLOWED_ORGS)
+
+# Commented to be used in the next version V5
+# if settings.IS_LAST_ORG_BATCH:
+#     get_active_orgs += "AND id > (%s)"
+#     org_query_attrs.append(settings.ORG_RANGE_FROM)
+
+get_active_orgs += "order by id;"  # FETCH FIRST (%s) ROWS ONLY;"
 
 
 class OrgPostgreSQL(BaseRetrieveStorage):
@@ -51,5 +52,6 @@ class OrgPostgreSQL(BaseRetrieveStorage):
             flowrun_query = cur.execute(
                 get_active_orgs,
                 *org_query_attrs,
+                # settings.ORGS_BATCH_SIZE,
             ).fetchall()
             return flowrun_query
