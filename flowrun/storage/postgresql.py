@@ -34,9 +34,11 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
 get_active_orgs = "SELECT id FROM orgs_org WHERE is_active = TRUE "
 org_query_attrs = []
 
-if settings.ALLOWED_ORGS:
-    get_active_orgs += "AND proj_uuid IN %s "
-    org_query_attrs.append(settings.ALLOWED_ORGS)
+if settings.ALLOWED_PROJECTS:
+    placeholders = ", ".join(["%s"] * len(settings.ALLOWED_PROJECTS))
+    get_active_orgs += f"AND proj_uuid IN ({placeholders}) "
+    org_query_attrs += settings.ALLOWED_PROJECTS
+
 
 # Commented to be used in the next version V5
 # if settings.IS_LAST_ORG_BATCH:
@@ -51,7 +53,7 @@ class OrgPostgreSQL(BaseRetrieveStorage):
         with get_cursor() as cur:
             flowrun_query = cur.execute(
                 get_active_orgs,
-                *org_query_attrs,
+                org_query_attrs,
                 # settings.ORGS_BATCH_SIZE,
             ).fetchall()
             return flowrun_query

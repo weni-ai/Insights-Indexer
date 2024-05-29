@@ -16,9 +16,16 @@ ORG_RANGE_TO = int(os.environ.get("ORG_RANGE_TO", 2000))
 IS_LAST_ORG_BATCH = bool(int(os.environ.get("IS_LAST_ORG_BATCH", "0")))
 
 if os.environ.get("ALLOWED_ORGS", "") != "":
-    ALLOWED_ORGS = tuple(org for org in os.environ.get("ALLOWED_ORGS").split(","))
+    ALLOWED_ORGS = list(org for org in os.environ.get("ALLOWED_ORGS").split(","))
 else:
-    ALLOWED_ORGS = ()
+    ALLOWED_ORGS = []
+
+if os.environ.get("ALLOWED_PROJECTS", "") != "":
+    ALLOWED_PROJECTS = list(
+        proj for proj in os.environ.get("ALLOWED_PROJECTS").split(",")
+    )
+else:
+    ALLOWED_PROJECTS = []
 
 CONNECTION_TYPE = os.environ.get("CONNECTION_TYPE", "pool")
 WAIT_TIME_RETRY = int(os.environ.get("WAIT_TIME_RETRY", 10))
