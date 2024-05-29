@@ -51,7 +51,7 @@ class BulkObjectETLProcessor:
                     break
 
             # [L]oad the treated object list into the new storage
-            is_inserted: bool = self.storage_to.bulk_insert(transformed_objects)
+            self.storage_to.bulk_insert(transformed_objects)
             time.sleep(settings.EMPTY_ORG_SLEEP)
 
         return is_inserted

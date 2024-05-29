@@ -51,4 +51,3 @@ class FlowRunElasticSearch(GenericStorage):
         logging.info(
             f"took {run_batch.get('took', 'err')}ms to index {len(run_batch.get('items', batch))} documents"
         )
-        return run_batch.get("errors", True)
