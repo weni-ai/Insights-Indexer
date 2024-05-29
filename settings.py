@@ -16,7 +16,7 @@ ORG_RANGE_TO = int(os.environ.get("ORG_RANGE_TO", 2000))
 IS_LAST_ORG_BATCH = bool(int(os.environ.get("IS_LAST_ORG_BATCH", "0")))
 
 if os.environ.get("ALLOWED_ORGS", "") != "":
-    ALLOWED_ORGS = list(org for org in os.environ.get("ALLOWED_ORGS").split(","))
+    ALLOWED_ORGS = list(int(org) for org in os.environ.get("ALLOWED_ORGS").split(","))
 else:
     ALLOWED_ORGS = []
 
