@@ -25,7 +25,7 @@ class BulkObjectETLProcessor:
             else self.storage_org.list_active()
         )
         for org in orgs:
-            org_id = org if type(org) == int else org.get("id")
+            org_id = org if type(org) is int else org.get("id")
 
             # Get last indexed timestamp document on the storage_to
             last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)

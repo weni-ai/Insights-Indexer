@@ -70,7 +70,10 @@ def flowrun_sql_to_elasticsearch_transformer(
         new_obj["value"] = value
 
         if value.isdigit():
-            new_obj["value_number"] = float(value)
+            try:
+                new_obj["value_number"] = float(value)
+            except ValueError:
+                pass
 
         new_results.append(new_obj)
     es_flow_run.pop("results", None)
