@@ -2,6 +2,10 @@ import settings
 from shared.storage import BaseRetrieveStorage
 from db.postgres.connection import get_cursor
 
+import logging
+import time
+
+logger = logging.getLogger(__name__)
 
 if settings.FLOWRUN_USE_ORG:
     get_flowrun_by_uuid_sql = "SELECT fr.id, fr.uuid, fr.status, fr.org_id, fr.created_on, fr.modified_on, fr.exited_on, fr.responded, fr.results, fr.delete_reason, fr.exit_type, c.uuid AS contact_uuid, c.name AS contact_name, cu.identity AS contact_urn, f.uuid AS flow_uuid, f.name AS flow_name, o.proj_uuid AS project_uuid FROM flows_flowrun fr INNER JOIN contacts_contact c ON fr.contact_id = c.id INNER JOIN contacts_contacturn cu ON cu.id =(SELECT id from contacts_contacturn WHERE contact_id = c.id FETCH FIRST 1 ROWS ONLY) INNER JOIN flows_flow f ON fr.flow_id = f.id INNER JOIN orgs_org o ON fr.org_id = o.id WHERE fr.uuid = (%s);"
@@ -13,22 +17,32 @@ list_flowrun_by_org_id_and_modified_on_sql = "SELECT fr.id, fr.uuid, fr.org_id, 
 
 class FlowRunPostgreSQL(BaseRetrieveStorage):
     def get_by_pk(self, identifier: str) -> dict:
+        start_time = time.time()
         with get_cursor() as cur:
-            flowrun_query = cur.execute(
-                get_flowrun_by_uuid_sql,
-                (identifier,),
-            ).fetchone()
-            return flowrun_query
+            try:
+                flowrun_query = cur.execute(
+                    get_flowrun_by_uuid_sql,
+                    (identifier,),
+                ).fetchone()
+            finally:
+                elapsed_time = time.time() - start_time
+                logging.info(f"get_by_pk executed in {elapsed_time:.2f} seconds")
+        return flowrun_query
 
     def list_by_timestamp_and_org(
         self, modified_on: str, org_id: int, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
+        start_time = time.time()
         with get_cursor() as cur:
-            flowrun_query = cur.execute(
-                list_flowrun_by_org_id_and_modified_on_sql,
-                (org_id, modified_on, limit),
-            ).fetchall()
-            return flowrun_query
+            try:
+                flowrun_query = cur.execute(
+                    list_flowrun_by_org_id_and_modified_on_sql,
+                    (org_id, modified_on, limit),
+                ).fetchall()
+            finally:
+                elapsed_time = time.time() - start_time
+                logging.info(f"list_by_timestamp_and_org executed in {elapsed_time:.2f} seconds")
+        return flowrun_query
 
 
 get_active_orgs = "SELECT id FROM orgs_org WHERE is_active = TRUE "
@@ -39,21 +53,25 @@ if settings.ALLOWED_PROJECTS:
     get_active_orgs += f"AND proj_uuid IN ({placeholders}) "
     org_query_attrs += settings.ALLOWED_PROJECTS
 
-
 # Commented to be used in the next version V5
 # if settings.IS_LAST_ORG_BATCH:
 #     get_active_orgs += "AND id > (%s)"
 #     org_query_attrs.append(settings.ORG_RANGE_FROM)
 
-get_active_orgs += "order by id;"  # FETCH FIRST (%s) ROWS ONLY;"
+get_active_orgs += "ORDER BY id;"  # FETCH FIRST (%s) ROWS ONLY;"
 
 
 class OrgPostgreSQL(BaseRetrieveStorage):
     def list_active(self) -> list[dict]:
+        start_time = time.time()
         with get_cursor() as cur:
-            flowrun_query = cur.execute(
-                get_active_orgs,
-                org_query_attrs,
-                # settings.ORGS_BATCH_SIZE,
-            ).fetchall()
-            return flowrun_query
+            try:
+                flowrun_query = cur.execute(
+                    get_active_orgs,
+                    org_query_attrs,
+                    # settings.ORGS_BATCH_SIZE,
+                ).fetchall()
+            finally:
+                elapsed_time = time.time() - start_time
+                logging.info(f"list_active executed in {elapsed_time:.2f} seconds")
+        return flowrun_query
