@@ -59,7 +59,6 @@ class BulkObjectETLProcessor:
                 if transform_start_time < datetime.now() - timedelta(
                     minutes=settings.BATCH_PROCESSING_TIME_LIMIT
                 ):  # no single org should take more than X time
-                    logger.warning(f"Transformation for org {org_id} exceeded time limit")
                     break
 
             transform_elapsed_time = time.time() - transform_start_time
