@@ -13,7 +13,7 @@ class FlowRunElasticSearch(GenericStorage):
     _index_name: str = settings.ES_FLOWRUN_INDEX_NAME
 
     def get_by_pk(self, identifier: str) -> dict:
-        start_time = time.time()
+        start_time = datetime.now()
         try:
             es_flow_run = get_connection().search(
                 index=self._index_name,
@@ -23,12 +23,12 @@ class FlowRunElasticSearch(GenericStorage):
             logging.warning(f"Elasticsearch Get error: {type(err)} {err}")
             return None
         finally:
-            elapsed_time = time.time() - start_time
-            logging.info(f"get_by_pk executed in {elapsed_time:.2f} seconds")
+            elapsed_time = datetime.now() - start_time
+            logging.info(f"get_by_pk executed in {elapsed_time.total_seconds():.2f} seconds")
         return es_flow_run
 
     def get_last_indexed(self, org):
-        start_time = time.time()
+        start_time = datetime.now()
         try:
             es_flow_run = get_connection().search(
                 index=self._index_name,
@@ -42,38 +42,38 @@ class FlowRunElasticSearch(GenericStorage):
             logging.warning(f"While listing flowruns: {type(err)} {err}")
             return {}
         finally:
-            elapsed_time = time.time() - start_time
-            logging.info(f"get_last_indexed executed in {elapsed_time:.2f} seconds")
+            elapsed_time = datetime.now() - start_time
+            logging.info(f"get_last_indexed executed in {elapsed_time.total_seconds():.2f} seconds")
         return es_flow_run
 
     def get_last_indexed_timestamp(self, org):
-        start_time = time.time()
+        start_time = datetime.now()
         try:
             result = self.get_last_indexed(org).get(
                 settings.FLOW_LAST_INDEXED_FIELD,
                 datetime.now(timezone.utc) - timedelta(minutes=settings.START_RUN_OFFSET),
             )
         finally:
-            elapsed_time = time.time() - start_time
-            logging.info(f"get_last_indexed_timestamp executed in {elapsed_time:.2f} seconds")
+            elapsed_time = datetime.now() - start_time
+            logging.info(f"get_last_indexed_timestamp executed in {elapsed_time.total_seconds():.2f} seconds")
         return result
 
     def insert(self, new_obj: dict) -> bool:
-        start_time = time.time()
+        start_time = datetime.now()
         try:
             es_flow_run = get_connection().index(index=self._index_name, body=new_obj)
         finally:
-            elapsed_time = time.time() - start_time
-            logging.info(f"insert executed in {elapsed_time:.2f} seconds")
+            elapsed_time = datetime.now()- start_time
+            logging.info(f"insert executed in {elapsed_time.total_seconds():.2f} seconds")
         return es_flow_run["result"] == "created"
 
     def bulk_insert(self, batch) -> bool:
-        start_time = time.time()
+        start_time = datetime.now()
         try:
             run_batch = get_connection().bulk(index=self._index_name, body=batch)
             logging.info(
                 f"took {run_batch.get('took', 'err')}ms to index {len(run_batch.get('items', batch))} documents"
             )
         finally:
-            elapsed_time = time.time() - start_time
-            logging.info(f"bulk_insert executed in {elapsed_time:.2f} seconds")
+            elapsed_time = datetime.now() - start_time
+            logging.info(f"bulk_insert executed in {elapsed_time.total_seconds():.2f} seconds")

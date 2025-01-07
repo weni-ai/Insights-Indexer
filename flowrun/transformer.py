@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any
 import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ def flowrun_sql_to_elasticsearch_transformer(
         ]
     }
     """
-    start_time = time.time()
+    start_time = datetime.now()
     es_flow_run = {**pg_flow_run}
     results = json.loads(pg_flow_run.get("results", {}))
     new_results = []
@@ -83,24 +84,24 @@ def flowrun_sql_to_elasticsearch_transformer(
     es_flow_run.pop("results", None)
     es_flow_run["values"] = new_results
 
-    elapsed_time = time.time() - start_time
-    logging.info(f"flowrun_sql_to_elasticsearch_transformer took {elapsed_time:.4f} seconds")
+    elapsed_time = datetime.now() - start_time
+    logging.info(f"flowrun_sql_to_elasticsearch_transformer took {elapsed_time.total_seconds():.4f} seconds")
     return es_flow_run
 
 def bulk_flowrun_sql_to_elasticsearch_transformer(
     pg_flow_run: list[dict],
 ) -> list[dict]:
-    start_time = time.time()
+    start_time = datetime.now()
     obj = flowrun_sql_to_elasticsearch_transformer(pg_flow_run)
     _id = obj.pop("id")
-    elapsed_time = time.time() - start_time
-    logging.info(f"bulk_flowrun_sql_to_elasticsearch_transformer took {elapsed_time:.4f} seconds")
+    elapsed_time = datetime.now() - start_time
+    logging.info(f"bulk_flowrun_sql_to_elasticsearch_transformer took {elapsed_time.total_seconds():.4f} seconds")
     return [{"index": {"_id": _id}}, obj]
 
 
 def flowrun_in_memory_transformer(flow_run: dict[str, Any]) -> dict[str, Any]:
-    start_time = time.time()
+    start_time = datetime.now()
     result = {**flow_run, "transformed": True}
-    elapsed_time = time.time() - start_time
-    logging.info(f"flowrun_in_memory_transformer took {elapsed_time:.4f} seconds")
+    elapsed_time = datetime.now() - start_time
+    logging.info(f"flowrun_in_memory_transformer took {elapsed_time.total_seconds():.4f} seconds")
     return result

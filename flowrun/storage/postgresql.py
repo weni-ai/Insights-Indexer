@@ -4,7 +4,7 @@ from db.postgres.connection import get_cursor
 
 import logging
 import time
-
+from datetime import datetime
 logger = logging.getLogger(__name__)
 
 if settings.FLOWRUN_USE_ORG:
@@ -17,7 +17,7 @@ list_flowrun_by_org_id_and_modified_on_sql = "SELECT fr.id, fr.uuid, fr.org_id, 
 
 class FlowRunPostgreSQL(BaseRetrieveStorage):
     def get_by_pk(self, identifier: str) -> dict:
-        start_time = time.time()
+        start_time = datetime.now()
         with get_cursor() as cur:
             try:
                 flowrun_query = cur.execute(
@@ -25,14 +25,14 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                     (identifier,),
                 ).fetchone()
             finally:
-                elapsed_time = time.time() - start_time
-                logging.info(f"get_by_pk executed in {elapsed_time:.2f} seconds")
+                elapsed_time = datetime.now() - start_time
+                logging.info(f"get_by_pk executed in {elapsed_time.total_seconds():.2f} seconds")
         return flowrun_query
 
     def list_by_timestamp_and_org(
         self, modified_on: str, org_id: int, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
-        start_time = time.time()
+        start_time = datetime.now()
         with get_cursor() as cur:
             try:
                 flowrun_query = cur.execute(
@@ -40,8 +40,8 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                     (org_id, modified_on, limit),
                 ).fetchall()
             finally:
-                elapsed_time = time.time() - start_time
-                logging.info(f"list_by_timestamp_and_org executed in {elapsed_time:.2f} seconds")
+                elapsed_time = datetime.now() - start_time
+                logging.info(f"list_by_timestamp_and_org executed in {elapsed_time.total_seconds():.2f} seconds")
         return flowrun_query
 
 
@@ -63,7 +63,7 @@ get_active_orgs += "ORDER BY id;"  # FETCH FIRST (%s) ROWS ONLY;"
 
 class OrgPostgreSQL(BaseRetrieveStorage):
     def list_active(self) -> list[dict]:
-        start_time = time.time()
+        start_time = datetime.now()
         with get_cursor() as cur:
             try:
                 flowrun_query = cur.execute(
@@ -72,6 +72,6 @@ class OrgPostgreSQL(BaseRetrieveStorage):
                     # settings.ORGS_BATCH_SIZE,
                 ).fetchall()
             finally:
-                elapsed_time = time.time() - start_time
-                logging.info(f"list_active executed in {elapsed_time:.2f} seconds")
+                elapsed_time = datetime.now() - start_time
+                logging.info(f"list_active executed in {elapsed_time.total_seconds():.2f} seconds")
         return flowrun_query
