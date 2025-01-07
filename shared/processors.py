@@ -48,7 +48,8 @@ class BulkObjectETLProcessor:
                 continue
 
             transformed_objects = []
-            transform_start_time = time.time()
+            transform_start_time = datetime.now()
+
 
             for obj in from_obj_list:
                 # [T]ransform the object into the new format to be saved in the storage_to
