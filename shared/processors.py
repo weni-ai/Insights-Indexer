@@ -29,11 +29,13 @@ class BulkObjectETLProcessor:
         )
         
         for org in orgs:
+            logger.info(f"Extraction for org {org}")
             org_id = org if type(org) is int else org.get("id")
             org_start_time = datetime.now()  # Tempo de início do processo por organização
 
             # Get last indexed timestamp document on the storage_to
             last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)
+            logger.info(f"last_indexed_at for org {org}, its:{last_indexed_at}")
 
             # [E]xtract the obj list from the From Storage, filtered by the last indexed timestamp
             extract_start_time = datetime.now()
@@ -50,6 +52,7 @@ class BulkObjectETLProcessor:
             transformed_objects = []
             transform_start_time = datetime.now()
 
+            logger.info(f"first object to be indexed {vars(from_obj_list[0])}")
 
             for obj in from_obj_list:
                 # [T]ransform the object into the new format to be saved in the storage_to
