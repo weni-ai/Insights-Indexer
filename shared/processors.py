@@ -52,7 +52,7 @@ class BulkObjectETLProcessor:
             transformed_objects = []
             transform_start_time = datetime.now()
 
-            logger.info(f"first object to be indexed {vars(from_obj_list[0])}")
+            logger.info(f"first object to be indexed {from_obj_list[0]}")
 
             for obj in from_obj_list:
                 # [T]ransform the object into the new format to be saved in the storage_to
