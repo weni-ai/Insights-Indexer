@@ -71,6 +71,7 @@ class FlowRunElasticSearch(GenericStorage):
         start_time = datetime.now()
         try:
             run_batch = get_connection().bulk(index=self._index_name, body=batch)
+            logging.info(f"run_batch data {run_batch}")
             logging.info(
                 f"took {run_batch.get('took', 'err')}ms to index {len(run_batch.get('items', batch))} documents"
             )
