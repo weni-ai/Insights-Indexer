@@ -32,6 +32,8 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
     def list_by_timestamp_and_org(
         self, modified_on: str, org_id: int, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
+        if str(org_id) == "16871":
+            limit = 600
         start_time = datetime.now()
         with get_cursor() as cur:
             try:
