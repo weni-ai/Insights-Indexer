@@ -20,7 +20,7 @@ class BulkObjectETLProcessor:
         self.storage_org = storage_org
 
     def execute(self):
-        start_time = time.time()  # Tempo de início do processo completo
+        start_time = time.time()  # Full process start time
 
         orgs = (
             settings.ALLOWED_ORGS
@@ -33,30 +33,36 @@ class BulkObjectETLProcessor:
             org_start_time = time.time()  # Process start time by organization
 
             # Get the last indexed timestamp
-            last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)
+            last_indexed_at, last_indexed_id = self.storage_to.get_last_indexed_timestamp(org_id)
 
-            # Retry loop up to 8 times
             max_retries = 8
             for attempt in range(max_retries):
                 extract_start_time = time.time()
 
-                # Extracts objects modified after last_indexed_at
+                # First search WITHOUT filtering by ID
                 from_obj_list = self.storage_from.list_by_timestamp_and_org(
                     modified_on=last_indexed_at, org_id=org_id
                 )
+
                 extract_elapsed_time = time.time() - extract_start_time
                 logger.info(
                     f"Extraction attempt {attempt+1}/{max_retries} for org {org_id} took {extract_elapsed_time:.4f} seconds"
                 )
 
-                # If it found objects, it exits the loop and continues the logic
+                # If you found objects, check if the last ID matches the one in Elasticsearch
                 if from_obj_list:
-                    break  
+                    last_returned_id = from_obj_list[-1]["uuid"]  # Get the last returned ID
+                    
+                    # If the last ID is equal to `last_indexed_id`, redo the search now passing `last_id`
+                    if last_returned_id == last_indexed_id:
+                        from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                            modified_on=last_indexed_at, org_id=org_id, last_uuid=last_indexed_id
+                        )
+                    else:
+                        break
+                else:
+                    break      
 
-                # If not found, increment last_indexed_at by 1 minute and try again
-                last_indexed_at += timedelta(minutes=1)
-
-            # If after 8 attempts the list is still empty, wait and continue
             if not from_obj_list:
                 time.sleep(settings.EMPTY_ORG_SLEEP)
                 continue
