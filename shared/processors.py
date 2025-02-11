@@ -35,33 +35,20 @@ class BulkObjectETLProcessor:
             # Get the last indexed timestamp
             last_indexed_at, last_indexed_id = self.storage_to.get_last_indexed_timestamp(org_id)
 
-            max_retries = 8
-            for attempt in range(max_retries):
-                extract_start_time = time.time()
+            # First search WITHOUT filtering by ID
+            from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                modified_on=last_indexed_at, org_id=org_id
+            )
 
-                # First search WITHOUT filtering by ID
-                from_obj_list = self.storage_from.list_by_timestamp_and_org(
-                    modified_on=last_indexed_at, org_id=org_id
-                )
-
-                extract_elapsed_time = time.time() - extract_start_time
-                logger.info(
-                    f"Extraction attempt {attempt+1}/{max_retries} for org {org_id} took {extract_elapsed_time:.4f} seconds"
-                )
-
-                # If you found objects, check if the last ID matches the one in Elasticsearch
-                if from_obj_list:
-                    last_returned_id = from_obj_list[-1]["uuid"]  # Get the last returned ID
+            # If you found objects, check if the last ID matches the one in Elasticsearch
+            if from_obj_list:
+                last_modified_on = from_obj_list[-1]["modified_on"]  # Get the last returned ID
                     
-                    # If the last ID is equal to `last_indexed_id`, redo the search now passing `last_id`
-                    if last_returned_id == last_indexed_id:
-                        from_obj_list = self.storage_from.list_by_timestamp_and_org(
-                            modified_on=last_indexed_at, org_id=org_id, last_uuid=last_indexed_id
-                        )
-                    else:
-                        break
-                else:
-                    break      
+            # If the last ID is equal to `last_indexed_id`, redo the search now passing `last_id`
+            if last_indexed_at == last_modified_on:
+                from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                modified_on=last_indexed_at, org_id=org_id, last_uuid=last_indexed_id
+            )   
 
             if not from_obj_list:
                 time.sleep(settings.EMPTY_ORG_SLEEP)
