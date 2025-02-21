@@ -32,15 +32,15 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
         return flowrun_query
 
     def list_by_timestamp_and_org(
-        self, modified_on: str, org_id: int, last_uuid: Optional[str] = None, limit: int = settings.FLOW_RUN_BATCH_LIMIT
+        self, modified_on: str, org_id: int, last_id: Optional[int] = None, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
         start_time = time.time()
         with get_cursor() as cur:
             try:
-                if last_uuid:
+                if last_id:
                     flowrun_query = cur.execute(
                         list_flowrun_by_org_id_and_last_id_sql,
-                        (org_id, last_uuid, limit),
+                        (org_id, last_id, limit),
                     ).fetchall()
                 else:
                     flowrun_query = cur.execute(
