@@ -32,14 +32,14 @@ class BulkObjectETLProcessor:
             org_id = org if type(org) is int else org.get("id")
             org_start_time = time.time()  # Process start time by organization
 
-            # Get the last indexed timestamp
-            last_indexed_at, last_indexed_id = self.storage_to.get_last_indexed_timestamp(org_id)
+            # Get the last indexed timestamp and UUID
+            last_indexed_at, last_indexed_uuid = self.storage_to.get_last_indexed_timestamp(org_id)
 
             max_retries = 8
             for attempt in range(max_retries):
                 extract_start_time = time.time()
 
-                # First search WITHOUT filtering by ID
+                # First search WITHOUT filtering by UUID
                 from_obj_list = self.storage_from.list_by_timestamp_and_org(
                     modified_on=last_indexed_at, org_id=org_id
                 )
@@ -49,26 +49,22 @@ class BulkObjectETLProcessor:
                     f"Extraction attempt {attempt+1}/{max_retries} for org {org_id} took {extract_elapsed_time:.4f} seconds"
                 )
 
-                # If you found objects, check if the last ID matches the one in Elasticsearch
+                # If we found objects, check if the last UUID matches the one in Elasticsearch
                 if from_obj_list:
-
-
-                    # looop 
-                    last_modified_on = from_obj_list[-1]["modified_on"]  # Get the last returned ID
-                    last_id_flows = from_obj_list[-1]["id"]
-                    # If the last ID is equal to `last_indexed_id`, redo the search now passing `last_id`
+                    last_uuid = from_obj_list[-1]["uuid"]
                     
-                    # Loop
-                    if last_indexed_at == last_modified_on:
+                    # If the last UUID matches, we need to get the next batch of records
+                    if last_uuid == last_indexed_uuid:
+                        # Get the next batch of records after this UUID
                         from_obj_list = self.storage_from.list_by_timestamp_and_org(
-                            modified_on=last_indexed_at, org_id=org_id, last_id=last_id_flows
+                            modified_on=last_indexed_at, 
+                            org_id=org_id, 
+                            last_id=last_uuid
                         )
-                    
-
-                        if(from_obj_list[-1]["modified_on"] == last_indexed_at)
-                            
-                            # loop pra ele bater novamente no flows
-
+                        
+                        # If we still get the same UUID, we need to continue with the next batch
+                        if from_obj_list and from_obj_list[-1]["uuid"] == last_uuid:
+                            continue
                     else:
                         break
                 else:
@@ -81,7 +77,6 @@ class BulkObjectETLProcessor:
             # Further processing
             transformed_objects = []
             transform_start_time = datetime.now()
-
 
             for obj in from_obj_list:
                 # [T]ransform the object into the new format to be saved in the storage_to
