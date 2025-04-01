@@ -40,7 +40,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                 if last_id:
                     flowrun_query = cur.execute(
                         list_flowrun_by_org_id_and_last_id_sql,
-                        (org_id, last_id, last_id, last_id, limit),
+                        (last_id, org_id, limit),
                     ).fetchall()
                 else:
                     flowrun_query = cur.execute(
