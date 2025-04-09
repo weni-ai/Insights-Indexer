@@ -22,26 +22,26 @@ class BulkObjectETLProcessor:
     def execute(self):
         start_time = time.time()  # Tempo de início do processo completo
 
-        orgs = (
-            settings.ALLOWED_ORGS
-            if settings.ALLOWED_ORGS != []
+        projects = (
+            settings.ALLOWED_PROJECTS
+            if settings.ALLOWED_PROJECTS != []
             else self.storage_org.list_active()
         )
         
-        for org in orgs:
-            org_id = org if type(org) is int else org.get("id")
-            org_start_time = time.time()  # Tempo de início do processo por organização
+        for project in projects:
+            project_uuid = project
+            project_start_time = time.time()  # Tempo de início do processo por organização
 
             # Get last indexed timestamp document on the storage_to
-            last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)
+            last_indexed_at = self.storage_to.get_last_indexed_timestamp(project_uuid)
 
             # [E]xtract the obj list from the From Storage, filtered by the last indexed timestamp
             extract_start_time = time.time()
-            from_obj_list = self.storage_from.list_by_timestamp_and_org(
-                modified_on=last_indexed_at, org_id=org_id
+            from_obj_list = self.storage_from.list_by_timestamp_and_project(
+                modified_on=last_indexed_at, project_uuid=project_uuid
             )
             extract_elapsed_time = time.time() - extract_start_time
-            logger.info(f"Extraction for org {org_id} took {extract_elapsed_time:.4f} seconds")
+            logger.info(f"Extraction for project {project_uuid} took {extract_elapsed_time:.4f} seconds")
 
             if len(from_obj_list) == 0:  # if there's no objects on the list
                 time.sleep(settings.EMPTY_ORG_SLEEP)
@@ -68,10 +68,10 @@ class BulkObjectETLProcessor:
             load_start_time = time.time()
             self.storage_to.bulk_insert(transformed_objects)
             load_elapsed_time = time.time() - load_start_time
-            logger.info(f"Load for org {org_id} took {load_elapsed_time:.4f} seconds")
+            logger.info(f"Load for org {project_uuid} took {load_elapsed_time:.4f} seconds")
 
-            org_elapsed_time = time.time() - org_start_time
-            logger.info(f"Processing for org {org_id} took {org_elapsed_time:.4f} seconds")
+            org_elapsed_time = time.time() - project_start_time
+            logger.info(f"Processing for org {project_uuid} took {org_elapsed_time:.4f} seconds")
 
             time.sleep(settings.EMPTY_ORG_SLEEP)
 
