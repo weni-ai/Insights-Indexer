@@ -3,6 +3,7 @@ import logging
 import settings
 from typing import Callable
 from datetime import datetime, timedelta
+from cache.org_cache import OrgIdCache
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +21,25 @@ class BulkObjectETLProcessor:
         self.storage_org = storage_org
 
     def execute(self):
-        start_time = time.time()  # Tempo de início do processo completo
+        start_time = time.time()
 
-        orgs = (
-            settings.ALLOWED_ORGS
-            if settings.ALLOWED_ORGS != []
-            else self.storage_org.list_active()
-        )
+        if settings.ORG_API_ENDPOINT:
+            cached_orgs = OrgIdCache.get_instance().get_org_ids()
+            
+            if cached_orgs:
+                orgs = cached_orgs
+            else:
+                orgs = (
+                    settings.ALLOWED_ORGS
+                    if settings.ALLOWED_ORGS != []
+                    else self.storage_org.list_active()
+                )
+        else:
+            orgs = (
+                settings.ALLOWED_ORGS
+                if settings.ALLOWED_ORGS != []
+                else self.storage_org.list_active()
+            )
         
         for org in orgs:
             org_id = org if type(org) is int else org.get("id")
