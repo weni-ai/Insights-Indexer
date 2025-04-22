@@ -35,40 +35,30 @@ class BulkObjectETLProcessor:
             # Get the last indexed timestamp and UUID
             last_indexed_at, last_indexed_uuid = self.storage_to.get_last_indexed_timestamp(org_id)
 
-            max_retries = 8
-            for attempt in range(max_retries):
-                extract_start_time = time.time()
+            extract_start_time = time.time()
 
-                # First search WITHOUT filtering by UUID
-                from_obj_list = self.storage_from.list_by_timestamp_and_org(
-                    modified_on=last_indexed_at, org_id=org_id
-                )
+            # First search WITHOUT filtering by UUID
+            from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                modified_on=last_indexed_at, org_id=org_id
+            )
 
-                extract_elapsed_time = time.time() - extract_start_time
-                logger.info(
-                    f"Extraction attempt {attempt+1}/{max_retries} for org {org_id} took {extract_elapsed_time:.4f} seconds"
-                )
+            extract_elapsed_time = time.time() - extract_start_time
+            logger.info(
+                f"Extraction for org {org_id} took {extract_elapsed_time:.4f} seconds"
+            )
 
-                # If we found objects, check if the last UUID matches the one in Elasticsearch
-                if from_obj_list:
-                    last_uuid = from_obj_list[-1]["uuid"]
-                    
-                    # If the last UUID matches, we need to get the next batch of records
-                    if last_uuid == last_indexed_uuid:
-                        # Get the next batch of records after this UUID
-                        from_obj_list = self.storage_from.list_by_timestamp_and_org(
-                            modified_on=last_indexed_at, 
-                            org_id=org_id, 
-                            last_id=last_uuid
-                        )
-                        
-                        # If we still get the same UUID, we need to continue with the next batch
-                        if from_obj_list and from_obj_list[-1]["uuid"] == last_uuid:
-                            continue
-                    else:
-                        break
-                else:
-                    break      
+            # If we found objects, check if the last UUID matches the one in Elasticsearch
+            if from_obj_list:
+                last_uuid = from_obj_list[-1]["uuid"]
+                
+                # If the last UUID matches, we need to get the next batch of records
+                if last_uuid == last_indexed_uuid:
+                    # Get the next batch of records after this UUID
+                    from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                        modified_on=last_indexed_at, 
+                        org_id=org_id, 
+                        last_id=last_uuid
+                    )
 
             if not from_obj_list:
                 time.sleep(settings.EMPTY_ORG_SLEEP)
