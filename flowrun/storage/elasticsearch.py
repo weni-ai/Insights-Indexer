@@ -50,7 +50,7 @@ class FlowRunElasticSearch(GenericStorage):
         start_time = time.time()
         try:
             last_indexed = self.get_last_indexed(org)
-            timestamp = self.get_last_indexed(org).get(
+            timestamp = last_indexed.get(
                 settings.FLOW_LAST_INDEXED_FIELD,
                 datetime.now(timezone.utc) - timedelta(minutes=settings.START_RUN_OFFSET),
             )
