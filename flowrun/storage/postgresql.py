@@ -15,7 +15,36 @@ else:
 
 list_flowrun_by_org_id_and_modified_on_sql = "SELECT fr.id, fr.uuid, fr.org_id, fr.status, fr.created_on, fr.modified_on, fr.exited_on, fr.responded, fr.results, fr.delete_reason, fr.exit_type, c.uuid AS contact_uuid, c.name AS contact_name, cu.identity AS contact_urn, f.uuid AS flow_uuid, f.name AS flow_name, o.proj_uuid AS project_uuid FROM flows_flowrun fr INNER JOIN contacts_contact c ON fr.contact_id = c.id LEFT JOIN contacts_contacturn cu ON cu.id =( SELECT id from contacts_contacturn WHERE contact_id = c.id FETCH FIRST 1 ROWS ONLY) INNER JOIN flows_flow f ON fr.flow_id = f.id INNER JOIN orgs_org o ON fr.org_id = o.id WHERE fr.exited_on IS NOT null AND fr.org_id =(%s) AND fr.modified_on > (%s) ORDER BY fr.modified_on ASC, id ASC FETCH FIRST (%s) ROWS ONLY;"
 
-list_flowrun_by_org_id_and_last_id_sql = "SELECT fr.id, fr.uuid, fr.org_id, fr.status, fr.created_on, fr.modified_on, fr.exited_on, fr.responded, fr.results, fr.delete_reason, fr.exit_type, c.uuid AS contact_uuid, c.name AS contact_name, cu.identity AS contact_urn, f.uuid AS flow_uuid, f.name AS flow_name, o.proj_uuid AS project_uuid FROM flows_flowrun fr INNER JOIN contacts_contact c ON fr.contact_id = c.id LEFT JOIN contacts_contacturn cu ON cu.id =( SELECT id FROM contacts_contacturn WHERE contact_id = c.id FETCH FIRST 1 ROWS ONLY) INNER JOIN flows_flow f ON fr.flow_id = f.id INNER JOIN orgs_org o ON fr.org_id = o.id WHERE fr.exited_on IS NOT NULL AND fr.org_id = (%s) AND fr.modified_on >= (SELECT modified_on FROM flows_flowrun WHERE uuid = %s LIMIT 1) AND (fr.modified_on > (SELECT modified_on FROM flows_flowrun WHERE uuid = %s LIMIT 1) OR fr.id > (SELECT id FROM flows_flowrun WHERE uuid = %s LIMIT 1)) ORDER BY fr.modified_on ASC, fr.id ASC FETCH FIRST %s ROWS ONLY;"
+list_flowrun_by_org_id_and_last_id_sql = """
+WITH last_flow AS (
+    SELECT modified_on, id 
+    FROM flows_flowrun 
+    WHERE uuid = %s 
+    LIMIT 1
+)
+SELECT fr.id, fr.uuid, fr.org_id, fr.status, fr.created_on, fr.modified_on, fr.exited_on, 
+       fr.responded, fr.results, fr.delete_reason, fr.exit_type, 
+       c.uuid AS contact_uuid, c.name AS contact_name, 
+       cu.identity AS contact_urn, 
+       f.uuid AS flow_uuid, f.name AS flow_name, 
+       o.proj_uuid AS project_uuid 
+FROM flows_flowrun fr 
+INNER JOIN contacts_contact c ON fr.contact_id = c.id 
+LEFT JOIN contacts_contacturn cu ON cu.id = (
+    SELECT id FROM contacts_contacturn 
+    WHERE contact_id = c.id 
+    FETCH FIRST 1 ROWS ONLY
+) 
+INNER JOIN flows_flow f ON fr.flow_id = f.id 
+INNER JOIN orgs_org o ON fr.org_id = o.id,
+last_flow lf
+WHERE fr.exited_on IS NOT NULL 
+AND fr.org_id = %s 
+AND fr.modified_on >= lf.modified_on
+AND (fr.modified_on > lf.modified_on OR fr.id > lf.id)
+ORDER BY fr.modified_on ASC, fr.id ASC 
+FETCH FIRST %s ROWS ONLY;
+"""
 
 class FlowRunPostgreSQL(BaseRetrieveStorage):
     def get_by_pk(self, identifier: str) -> dict:
@@ -32,7 +61,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
         return flowrun_query
 
     def list_by_timestamp_and_org(
-        self, modified_on: str, org_id: int, last_id: Optional[int] = None, limit: int = settings.FLOW_RUN_BATCH_LIMIT
+        self, modified_on: str, org_id: int, last_id: Optional[str] = None, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
         start_time = time.time()
         with get_cursor() as cur:
@@ -40,7 +69,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                 if last_id:
                     flowrun_query = cur.execute(
                         list_flowrun_by_org_id_and_last_id_sql,
-                        (org_id, last_id, last_id, last_id, limit),
+                        (last_id, org_id, limit),
                     ).fetchall()
                 else:
                     flowrun_query = cur.execute(
