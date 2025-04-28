@@ -36,12 +36,11 @@ LEFT JOIN contacts_contacturn cu ON cu.id = (
     FETCH FIRST 1 ROWS ONLY
 ) 
 INNER JOIN flows_flow f ON fr.flow_id = f.id 
-INNER JOIN orgs_org o ON fr.org_id = o.id,
-last_flow lf
+INNER JOIN orgs_org o ON fr.org_id = o.id
+CROSS JOIN last_flow lf
 WHERE fr.exited_on IS NOT NULL 
 AND fr.org_id = %s 
-AND fr.modified_on >= lf.modified_on
-AND (fr.modified_on > lf.modified_on OR fr.id > lf.id)
+AND (fr.modified_on > lf.modified_on OR (fr.modified_on = lf.modified_on AND fr.id > lf.id))
 ORDER BY fr.modified_on ASC, fr.id ASC 
 FETCH FIRST %s ROWS ONLY;
 """
