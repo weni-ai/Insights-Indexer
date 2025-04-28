@@ -20,7 +20,7 @@ class BulkObjectETLProcessor:
         self.storage_org = storage_org
 
     def execute(self):
-        start_time = time.time()  # Tempo de início do processo completo
+        start_time = time.time()  # Full process start time
 
         orgs = (
             settings.ALLOWED_ORGS
@@ -30,26 +30,43 @@ class BulkObjectETLProcessor:
         
         for org in orgs:
             org_id = org if type(org) is int else org.get("id")
-            org_start_time = time.time()  # Tempo de início do processo por organização
+            org_start_time = time.time()  # Process start time by organization
 
-            # Get last indexed timestamp document on the storage_to
-            last_indexed_at = self.storage_to.get_last_indexed_timestamp(org_id)
+            # Get the last indexed timestamp and UUID
+            last_indexed_at, last_indexed_uuid = self.storage_to.get_last_indexed_timestamp(org_id)
 
-            # [E]xtract the obj list from the From Storage, filtered by the last indexed timestamp
             extract_start_time = time.time()
+
+            # First search WITHOUT filtering by UUID
             from_obj_list = self.storage_from.list_by_timestamp_and_org(
                 modified_on=last_indexed_at, org_id=org_id
             )
-            extract_elapsed_time = time.time() - extract_start_time
-            logger.info(f"Extraction for org {org_id} took {extract_elapsed_time:.4f} seconds")
 
-            if len(from_obj_list) == 0:  # if there's no objects on the list
+            extract_elapsed_time = time.time() - extract_start_time
+            logger.info(
+                f"Extraction for org {org_id} took {extract_elapsed_time:.4f} seconds"
+            )
+
+            # If we found objects, check if the last UUID matches the one in Elasticsearch
+            if from_obj_list:
+                last_uuid = from_obj_list[-1]["uuid"]
+                
+                # If the last UUID matches, we need to get the next batch of records
+                if last_uuid == last_indexed_uuid:
+                    # Get the next batch of records after this UUID
+                    from_obj_list = self.storage_from.list_by_timestamp_and_org(
+                        modified_on=last_indexed_at, 
+                        org_id=org_id, 
+                        last_id=last_uuid
+                    )
+
+            if not from_obj_list:
                 time.sleep(settings.EMPTY_ORG_SLEEP)
                 continue
 
+            # Further processing
             transformed_objects = []
             transform_start_time = datetime.now()
-
 
             for obj in from_obj_list:
                 # [T]ransform the object into the new format to be saved in the storage_to
