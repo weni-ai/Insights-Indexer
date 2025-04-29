@@ -27,7 +27,7 @@ class FlowRunElasticSearch(GenericStorage):
             logging.info(f"get_by_pk executed in {elapsed_time:.2f} seconds")
         return es_flow_run
 
-    def get_last_indexed(self, org):
+    def get_last_indexed(self, project_uuid):
         start_time = time.time()
         try:
             es_flow_run = get_connection().search(
@@ -35,7 +35,7 @@ class FlowRunElasticSearch(GenericStorage):
                 body={
                     "size": 1,
                     "sort": {settings.FLOW_LAST_INDEXED_FIELD: "desc"},
-                    "query": {"term": {"org_id": org}},
+                    "query": {"term": {"project_uuid": project_uuid}},
                 },
             )["hits"]["hits"][0]["_source"]
         except (AttributeError, TypeError, IndexError) as err:
@@ -46,10 +46,10 @@ class FlowRunElasticSearch(GenericStorage):
             logging.info(f"get_last_indexed executed in {elapsed_time:.2f} seconds")
         return es_flow_run
 
-    def get_last_indexed_timestamp(self, org):
+    def get_last_indexed_timestamp(self, project_uuid):
         start_time = time.time()
         try:
-            result = self.get_last_indexed(org).get(
+            result = self.get_last_indexed(project_uuid).get(
                 settings.FLOW_LAST_INDEXED_FIELD,
                 datetime.now(timezone.utc) - timedelta(minutes=settings.START_RUN_OFFSET),
             )

@@ -23,7 +23,7 @@ class BulkObjectETLProcessor:
     def execute(self):
         start_time = time.time()
 
-        if settings.ORG_API_ENDPOINT:
+        if settings.PROJECT_API_ENDPOINT:
             cached_projects = ProjectUUIDCache.get_instance().get_projects_uuids()
             
             if cached_projects:
@@ -50,7 +50,7 @@ class BulkObjectETLProcessor:
 
             # [E]xtract the obj list from the From Storage, filtered by the last indexed timestamp
             extract_start_time = time.time()
-            from_obj_list = self.storage_from.list_by_timestamp_and_org(
+            from_obj_list = self.storage_from.list_by_timestamp_and_project(
                 modified_on=last_indexed_at, project_uuid=project_uuid
             )
             extract_elapsed_time = time.time() - extract_start_time
