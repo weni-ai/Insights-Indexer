@@ -35,8 +35,9 @@ class ProjectUUIDCache:
     def _fetch_projects_from_api(self):
         """Busca a lista de uuids de projetos do endpoint"""
         try:
+            headers = {"Authorization": f"Token {settings.STATIC_API_TOKEN}"}
             logger.info(f"Buscando projetos do endpoint: {self.endpoint_url}")
-            response = requests.get(self.endpoint_url, timeout=30)
+            response = requests.get(self.endpoint_url, headers=headers, timeout=30)
             if response.status_code == 200:
                 project_uuids    = response.json()
                 logger.info(f"Recebidas {len(project_uuids)} projetos do endpoint")
