@@ -6,6 +6,7 @@ FLOWRUN_USE_ORG = bool(int(os.environ.get("FLOWRUN_USE_ORG", "1")))
 
 ES_URL = os.environ.get("ES_URL", "")
 ES_FLOWRUN_INDEX_NAME = os.environ.get("ES_FLOWRUN_INDEX_NAME", "flowruns")
+ES_FLOWRUN_TEST_INDEX_NAME = os.environ.get("ES_FLOWRUN_TEST_INDEX_NAME", "flowruns_test")
 FLOW_RUN_BATCH_LIMIT = int(os.environ.get("FLOW_RUN_BATCH_LIMIT", 100))
 EMPTY_ORG_SLEEP = float(os.environ.get("EMPTY_ORG_SLEEP", 0.1))
 BATCH_PROCESSING_TIME_LIMIT = int(os.environ.get("BATCH_PROCESSING_TIME_LIMIT", 30))

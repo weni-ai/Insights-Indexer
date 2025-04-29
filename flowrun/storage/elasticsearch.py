@@ -10,7 +10,7 @@ from shared.storage import GenericStorage
 logger = logging.getLogger(__name__)
 
 class FlowRunElasticSearch(GenericStorage):
-    _index_name: str = settings.ES_FLOWRUN_INDEX_NAME
+    _index_name: str = settings.ES_FLOWRUN_TEST_INDEX_NAME
 
     def get_by_pk(self, identifier: str) -> dict:
         start_time = time.time()
