@@ -36,8 +36,8 @@ CONSUMER_MAIN_DELAY = int(os.environ.get("CONSUMER_MAIN_DELAY", 1000))
 USE_SENTRY = bool(int(os.environ.get("USE_SENTRY", "0")))
 SENTRY_DSN = os.environ.get("SENTRY_DSN", None)
 
-# Configurações para o cache de IDs de organizações
-ORG_API_ENDPOINT = os.environ.get("ORG_API_ENDPOINT", "")
-ORG_CACHE_KEY = os.environ.get("ORG_CACHE_KEY", "allowed_orgs_cache")
-ORG_CACHE_TTL = int(os.environ.get("ORG_CACHE_TTL", 86400))  # 24 horas
+# Configurações para o cache de IDs de projetos
+PROJECT_API_ENDPOINT = os.environ.get("PROJECT_API_ENDPOINT", "")
+PROJECT_CACHE_KEY = os.environ.get("PROJECT_CACHE_KEY", "allowed_projects_cache")
+PROJECT_CACHE_TTL = int(os.environ.get("PROJECT_CACHE_TTL", 86400))  # 24 horas
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")

@@ -6,9 +6,9 @@ from db.redis.connection import get_connection as get_redis_connection
 
 logger = logging.getLogger(__name__)
 
-class OrgIdCache:
+class ProjectUUIDCache:
     """
-    Gerencia o cache de IDs de organizações, com atualização sob demanda.
+    Gerencia o cache de uuid de projetos, com atualização sob demanda.
     """
     
     _instance = None
@@ -18,13 +18,13 @@ class OrgIdCache:
         """Implementação Singleton para o cache"""
         if cls._instance is None:
             cls._instance = cls(
-                endpoint_url=settings.ORG_API_ENDPOINT,
-                cache_key=settings.ORG_CACHE_KEY,
-                ttl_seconds=settings.ORG_CACHE_TTL
+                endpoint_url=settings.PROJECT_API_ENDPOINT,
+                cache_key=settings.PROJECT_CACHE_KEY,
+                ttl_seconds=settings.PROJECT_CACHE_TTL
             )
         return cls._instance
     
-    def __init__(self, endpoint_url, cache_key="allowed_orgs_cache", ttl_seconds=86400):
+    def __init__(self, endpoint_url, cache_key="allowed_projects_cache", ttl_seconds=86400):
         self.endpoint_url = endpoint_url
         self.cache_key = cache_key
         self.ttl_seconds = ttl_seconds
@@ -32,20 +32,20 @@ class OrgIdCache:
         self.last_check_time = 0
         self.check_interval = 300  # Verifica a cada 5 minutos
         
-    def _fetch_orgs_from_api(self):
-        """Busca a lista de IDs de organizações do endpoint"""
+    def _fetch_projects_from_api(self):
+        """Busca a lista de uuids de projetos do endpoint"""
         try:
-            logger.info(f"Buscando organizações do endpoint: {self.endpoint_url}")
+            logger.info(f"Buscando projetos do endpoint: {self.endpoint_url}")
             response = requests.get(self.endpoint_url, timeout=30)
             if response.status_code == 200:
-                org_ids = response.json()
-                logger.info(f"Recebidas {len(org_ids)} organizações do endpoint")
-                return org_ids
+                project_uuids    = response.json()
+                logger.info(f"Recebidas {len(project_uuids)} projetos do endpoint")
+                return project_uuids
             else:
-                logger.error(f"Erro ao buscar organizações: status {response.status_code}")
+                logger.error(f"Erro ao buscar projetos: status {response.status_code}")
                 return []
         except Exception as e:
-            logger.exception(f"Exceção ao buscar organizações: {str(e)}")
+            logger.exception(f"Exceção ao buscar projetos: {str(e)}")
             return []
 
     def _should_refresh_cache(self):
@@ -59,9 +59,9 @@ class OrgIdCache:
         ttl = self.redis.ttl(self.cache_key)
         return ttl < 0 or ttl < (self.ttl_seconds * 0.25)
 
-    def get_org_ids(self):
+    def get_projects_uuids(self):
         """
-        Obtém a lista de IDs de organizações do cache.
+        Obtém a lista de uuids de projetos do cache.
         Atualiza o cache automaticamente quando necessário.
         """
         # Verifica se o endpoint está configurado
@@ -70,16 +70,16 @@ class OrgIdCache:
             
         # Verifica se precisa atualizar o cache
         if self._should_refresh_cache():
-            org_ids = self._fetch_orgs_from_api()
-            if org_ids:
-                org_ids_str = ",".join(str(org_id) for org_id in org_ids)
-                self.redis.setex(self.cache_key, self.ttl_seconds, org_ids_str)
-                return org_ids
+            projects_uuids   = self._fetch_projects_from_api()
+            if projects_uuids:
+                projects_uuids_str = ",".join(str(project_uuid) for project_uuid in projects_uuids)
+                self.redis.setex(self.cache_key, self.ttl_seconds, projects_uuids_str)
+                return projects_uuids
         
         # Tenta obter do cache
         cached_value = self.redis.get(self.cache_key)
         if cached_value:
-            return [int(org_id) for org_id in cached_value.split(",") if org_id.strip()]
+            return [str(project_uuid) for project_uuid in cached_value.split(",") if project_uuid.strip()]
         
         # Retorna lista vazia se nada estiver disponível
         return []
