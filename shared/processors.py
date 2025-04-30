@@ -61,17 +61,14 @@ class BulkObjectETLProcessor:
                 continue
 
             transformed_objects = []
-            transform_start_time = datetime.now()
-
+            transform_start_time = time.time()
 
             for obj in from_obj_list:
                 # [T]ransform the object into the new format to be saved in the storage_to
                 transformed_obj = self.object_transformer(obj)
                 transformed_objects += transformed_obj
 
-                if transform_start_time < datetime.now() - timedelta(
-                    minutes=settings.BATCH_PROCESSING_TIME_LIMIT
-                ):  # no single org should take more than X time
+                if (time.time() - transform_start_time) > (settings.BATCH_PROCESSING_TIME_LIMIT * 60):
                     break
 
             transform_elapsed_time = time.time() - transform_start_time
