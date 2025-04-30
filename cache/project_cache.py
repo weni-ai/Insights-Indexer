@@ -39,7 +39,8 @@ class ProjectUUIDCache:
             logger.info(f"Buscando projetos do endpoint: {self.endpoint_url}")
             response = requests.get(self.endpoint_url, headers=headers, timeout=30)
             if response.status_code == 200:
-                project_uuids    = response.json()
+                data = response.json()
+                project_uuids = [item["uuid"] for item in data]  # Extrair UUIDs dos dicionários
                 logger.info(f"Recebidas {len(project_uuids)} projetos do endpoint")
                 return project_uuids
             else:
