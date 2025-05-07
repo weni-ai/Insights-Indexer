@@ -15,6 +15,7 @@ sqlalchemy = "^2.0.30"
 requests = "^2.31.0"
 elasticsearch = "7.14"
 sentry-sdk = "^2.3.1"
+flask = "^3.1.0"
 
 
 [build-system]
