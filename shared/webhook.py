@@ -30,7 +30,7 @@ def project_update_webhook():
             "message": "Missing required field: project_uuid"
         }), 400
     
-    logger.info(f"Received project update notification for project_uuid={project_uuid}")
+    logger.info("Received project update notification for project_uuid={}".format(project_uuid))
     
     threading.Thread(
         target=update_project_cache,
@@ -40,7 +40,7 @@ def project_update_webhook():
     
     return jsonify({
         "status": "success",
-        "message": f"Project {project_uuid} will be included in the next indexing cycle"
+        "message": "Project {} will be included in the next indexing cycle".format(project_uuid)
     })
 
 def update_project_cache(project_uuid):
@@ -48,7 +48,7 @@ def update_project_cache(project_uuid):
     Updates the project cache to include the released project
     """
     try:
-        logger.info(f"Updating project cache for project_uuid={project_uuid}")
+        logger.info("Updating project cache for project_uuid={}".format(project_uuid))
         
         cache = ProjectUUIDCache.get_instance()
         
@@ -56,12 +56,12 @@ def update_project_cache(project_uuid):
         
         projects = cache.get_projects_uuids()
         if projects and project_uuid in [p if isinstance(p, str) else p.get("uuid") for p in projects]:
-            logger.info(f"Project {project_uuid} successfully added to cache")
+            logger.info("Project {} successfully added to cache".format(project_uuid))
         else:
-            logger.warning(f"Project {project_uuid} might not be in the cache yet. Will be included in next refresh.")
+            logger.warning("Project {} might not be in the cache yet. Will be included in next refresh.".format(project_uuid))
         
     except Exception as e:
-        logger.error(f"Error updating project cache for project_uuid={project_uuid}: {str(e)}")
+        logger.error("Error updating project cache for project_uuid={}: {}".format(project_uuid, str(e)))
 
 def run_webhook_server():
     """Starts the Flask server for the webhook"""
