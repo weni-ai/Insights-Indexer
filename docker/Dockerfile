@@ -102,6 +102,7 @@ COPY --chown=${PROJECT_USER}:${PROJECT_GROUP} . ${PROJECT_PATH}
 USER "${PROJECT_USER}:${PROJECT_GROUP}"
 
 EXPOSE 8000
+EXPOSE 5000
 
 ENTRYPOINT ["bash", "docker-entrypoint.sh"]
 CMD ["start"]
