@@ -67,7 +67,7 @@ def run_webhook_server():
     """Starts the Flask server for the webhook"""
     app.run(
         host=settings.WEBHOOK_HOST if hasattr(settings, 'WEBHOOK_HOST') else '0.0.0.0',
-        port=settings.WEBHOOK_PORT if hasattr(settings, 'WEBHOOK_PORT') else 5000,
+        port=settings.WEBHOOK_PORT if hasattr(settings, 'WEBHOOK_PORT') else 8000,
         debug=settings.DEBUG if hasattr(settings, 'DEBUG') else False
     )
 
