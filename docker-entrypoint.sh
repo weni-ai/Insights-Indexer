@@ -32,7 +32,7 @@ do_gosu(){
 
 if [[ "start" == "$1" ]]; then
     echo "Starting python worker"
-    do_gosu "${PROJECT_USER}:${PROJECT_GROUP}" python run.py
+    do_gosu "${PROJECT_USER}:${PROJECT_GROUP}" exec python run.py
 elif [[ "start-webhook" == "$1" ]]; then
     echo "Starting webhook server"
     do_gosu "${PROJECT_USER}:${PROJECT_GROUP}" exec python -m shared.webhook
