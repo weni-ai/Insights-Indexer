@@ -7,6 +7,13 @@ import threading
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
+@app.route('/', methods=['GET'])
+def health_check():
+    """
+    Health check endpoint
+    """
+    return '', 200
+
 @app.route('/webhook/project/update', methods=['POST'])
 def project_update_webhook():
     """
@@ -51,8 +58,6 @@ def update_project_cache(project_uuid):
         logger.info("Updating project cache for project_uuid={}".format(project_uuid))
         
         cache = ProjectUUIDCache.get_instance()
-        
-        cache.refresh()
         
         projects = cache.get_projects_uuids()
         if projects and project_uuid in [p if isinstance(p, str) else p.get("uuid") for p in projects]:
