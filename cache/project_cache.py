@@ -70,13 +70,11 @@ class ProjectUUIDCache:
         if not self.endpoint_url:
             return []
             
-        # Verifica se precisa atualizar o cache
-        if self._should_refresh_cache():
-            projects_uuids   = self._fetch_projects_from_api()
-            if projects_uuids:
-                projects_uuids_str = ",".join(str(project_uuid) for project_uuid in projects_uuids)
-                self.redis.setex(self.cache_key, self.ttl_seconds, projects_uuids_str)
-                return projects_uuids
+        projects_uuids   = self._fetch_projects_from_api()
+        if projects_uuids:
+            projects_uuids_str = ",".join(str(project_uuid) for project_uuid in projects_uuids)
+            self.redis.setex(self.cache_key, self.ttl_seconds, projects_uuids_str)
+            return projects_uuids
         
         # Tenta obter do cache
         cached_value = self.redis.get(self.cache_key)
