@@ -42,4 +42,4 @@ PROJECT_API_ENDPOINT = os.environ.get("PROJECT_API_ENDPOINT", "https://insights-
 PROJECT_CACHE_KEY = os.environ.get("PROJECT_CACHE_KEY", "allowed_projects_cache")
 PROJECT_CACHE_TTL = int(os.environ.get("PROJECT_CACHE_TTL", 86400))  # 24 horas
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-STATIC_API_TOKEN = os.environ.get("STATIC_API_TOKEN", "static_api_token")
+STATIC_API_TOKEN = os.environ.get("STATIC_API_TOKEN", "087b7bb6-9e7c-4f92-b83e-5c4c25b87613")
