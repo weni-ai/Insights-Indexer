@@ -24,6 +24,12 @@ def project_update_webhook():
         "project_uuid": "UUID of the released project"
     }
     """
+    STATIC_TOKEN = settings.STATIC_TOKEN
+    token = request.headers.get('Authorization')
+    
+    if token != f"Bearer {STATIC_TOKEN}":
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
     data = request.json
     
     if not data:
