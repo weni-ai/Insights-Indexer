@@ -30,14 +30,21 @@ class FlowRunElasticSearch(GenericStorage):
     def get_last_indexed(self, project_uuid):
         start_time = time.time()
         try:
-            es_flow_run = get_connection().search(
+            response = get_connection().search(
                 index=self._index_name,
                 body={
                     "size": 1,
                     "sort": {settings.FLOW_LAST_INDEXED_FIELD: "desc"},
                     "query": {"term": {"project_uuid": project_uuid}},
                 },
-            )["hits"]["hits"][0]["_source"]
+            )
+            
+            if response.get("hits", {}).get("hits"):
+                es_flow_run = response["hits"]["hits"][0]["_source"]
+            else:
+                logging.info(f"No flowruns found for project {project_uuid}")
+                return {}
+                
         except (AttributeError, TypeError, IndexError) as err:
             logging.warning(f"While listing flowruns: {type(err)} {err}")
             return {}
