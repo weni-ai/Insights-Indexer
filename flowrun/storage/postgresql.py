@@ -5,6 +5,7 @@ from db.postgres.connection import get_cursor
 import logging
 import time
 from datetime import datetime
+
 logger = logging.getLogger(__name__)
 
 if settings.FLOWRUN_USE_ORG:
@@ -26,7 +27,9 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                 ).fetchone()
             finally:
                 elapsed_time = datetime.now() - start_time
-                logging.info(f"get_by_pk executed in {elapsed_time.total_seconds():.2f} seconds")
+                logging.info(
+                    f"get_by_pk executed in {elapsed_time.total_seconds():.2f} seconds"
+                )
         return flowrun_query
 
     def list_by_timestamp_and_org(
@@ -34,7 +37,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
     ) -> list[dict]:
         special_orgs = ["16871", "13837", "18856"]
         if str(org_id) in special_orgs:
-            limit = 600
+            limit = 1000
         start_time = datetime.now()
         with get_cursor() as cur:
             try:
@@ -44,7 +47,9 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                 ).fetchall()
             finally:
                 elapsed_time = datetime.now() - start_time
-                logging.info(f"list_by_timestamp_and_org executed in {elapsed_time.total_seconds():.2f} seconds")
+                logging.info(
+                    f"list_by_timestamp_and_org executed in {elapsed_time.total_seconds():.2f} seconds"
+                )
         return flowrun_query
 
 
@@ -76,5 +81,7 @@ class OrgPostgreSQL(BaseRetrieveStorage):
                 ).fetchall()
             finally:
                 elapsed_time = datetime.now() - start_time
-                logging.info(f"list_active executed in {elapsed_time.total_seconds():.2f} seconds")
+                logging.info(
+                    f"list_active executed in {elapsed_time.total_seconds():.2f} seconds"
+                )
         return flowrun_query
