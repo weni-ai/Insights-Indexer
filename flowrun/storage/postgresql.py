@@ -37,7 +37,7 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
     ) -> list[dict]:
         special_orgs = ["16871", "13837", "18856"]
         if str(org_id) in special_orgs:
-            limit = 1000
+            limit = 2000
         start_time = datetime.now()
         with get_cursor() as cur:
             try:
