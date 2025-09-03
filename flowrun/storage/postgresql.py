@@ -32,6 +32,11 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
     def list_by_timestamp_and_org(
         self, modified_on: str, org_id: int, limit: int = settings.FLOW_RUN_BATCH_LIMIT
     ) -> list[dict]:
+        special_orgs = settings.SPECIAL_ORGS
+
+        if str(org_id) in special_orgs:
+            limit = settings.SPECIAL_ORG_LIMIT
+
         start_time = time.time()
         with get_cursor() as cur:
             try:
@@ -41,7 +46,9 @@ class FlowRunPostgreSQL(BaseRetrieveStorage):
                 ).fetchall()
             finally:
                 elapsed_time = time.time() - start_time
-                logging.info(f"list_by_timestamp_and_org executed in {elapsed_time:.2f} seconds")
+                logging.info(
+                    f"list_by_timestamp_and_org executed in {elapsed_time:.2f} seconds"
+                )
         return flowrun_query
 
 
