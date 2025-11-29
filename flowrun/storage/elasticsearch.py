@@ -49,14 +49,16 @@ class FlowRunElasticSearch(GenericStorage):
     def get_last_indexed_timestamp(self, org):
         start_time = time.time()
         try:
-            result = self.get_last_indexed(org).get(
+            last_indexed = self.get_last_indexed(org)
+            timestamp = last_indexed.get(
                 settings.FLOW_LAST_INDEXED_FIELD,
                 datetime.now(timezone.utc) - timedelta(minutes=settings.START_RUN_OFFSET),
             )
+            flow_uuid = last_indexed.get("uuid")
         finally:
             elapsed_time = time.time() - start_time
             logging.info(f"get_last_indexed_timestamp executed in {elapsed_time:.2f} seconds")
-        return result
+        return timestamp, flow_uuid
 
     def insert(self, new_obj: dict) -> bool:
         start_time = time.time()
